@@ -24,7 +24,7 @@ add_subdirectory(ext/glfw)
 
 add_executable(
         ${PROJECT_NAME}
-        #Pekka
+        #Helios
         src/main.cpp
 
         #glad
