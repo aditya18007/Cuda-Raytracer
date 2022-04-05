@@ -1,4 +1,4 @@
-<p align="center">   <img      width="300"     height="300"     src="https://github.com/aditya18007/Cuda-Raytracer/blob/main/assets/logo_main.svg"   > </p>
+<p align="center">   <img      width="100"     height="100"     src="https://github.com/aditya18007/Cuda-Raytracer/blob/main/assets/logo_main.svg"   > </p>
 
 # Helios
 
