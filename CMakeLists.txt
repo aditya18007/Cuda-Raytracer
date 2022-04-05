@@ -24,14 +24,27 @@ add_subdirectory(ext/glfw)
 
 add_executable(
         ${PROJECT_NAME}
+        #Pekka
         src/main.cpp
+
+        #glad
         ext/glad/src/glad.c
+
+        #imgui
+        ext/imgui/imgui.cpp
+        ext/imgui/imgui_impl_glfw.cpp
+        ext/imgui/imgui_demo.cpp
+        ext/imgui/imgui_draw.cpp
+        ext/imgui/imgui_tables.cpp
+        ext/imgui/imgui_widgets.cpp
+        ext/imgui/imgui_impl_opengl3.cpp
 )
 
 target_include_directories(
         ${PROJECT_NAME} PRIVATE
         ext/glad/include
         ext/glfw/include
+        ext/imgui/
 )
 
 target_link_libraries(${PROJECT_NAME} glfw OpenGL::GL)
