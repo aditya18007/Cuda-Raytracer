@@ -1,4 +1,4 @@
-<img src="assets/logo.svg" style="zoom:5%;" />
+<img src="assets/logo.svg" style="zoom:2%;" />
 
 # Helios
 
