@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.15)
 
-project (pekka)
+project (Helios)
 
 set(TARGET ${PROJECT_NAME})
 
