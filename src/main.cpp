@@ -2,7 +2,7 @@
 
 int main(int, char**)
 {
-	Application a(1800, 900);
+	Application a(1600,900 );
 	a.run();
 	return 0;
 }
