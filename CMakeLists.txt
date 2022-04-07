@@ -1,6 +1,6 @@
-cmake_minimum_required (VERSION 3.15)
+cmake_minimum_required (VERSION 3.18)
 
-project (Helios)
+project (Helios LANGUAGES CUDA CXX C)
 
 set(TARGET ${PROJECT_NAME})
 
@@ -8,9 +8,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+#CUDA
+find_package(CUDAToolkit REQUIRED)
 
 #OpenGL
 find_package(OpenGL REQUIRED)
@@ -22,10 +21,11 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
 add_subdirectory(ext/glfw)
 
-add_executable(
-        ${PROJECT_NAME}
+set(
+        SOURCES
         #Helios
         src/main.cpp
+        src/test.cu
 
         #glad
         ext/glad/src/glad.c
@@ -40,11 +40,17 @@ add_executable(
         ext/imgui/imgui_impl_opengl3.cpp
 )
 
-target_include_directories(
-        ${PROJECT_NAME} PRIVATE
+add_executable(${PROJECT_NAME} ${SOURCES})
+target_include_directories(${PROJECT_NAME} PRIVATE ${CUDAToolkit_INCLUDE_DIRS}
         ext/glad/include
         ext/glfw/include
         ext/imgui/
-)
+        )
+set_target_properties(${PROJECT_NAME} PROPERTIES
+        CUDA_SEPARABLE_COMPILATION ON
+        CUDA_ARCHITECTURES 60)
+target_compile_options(${PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
+        --keep # Keep PTX code
+        >)
+target_link_libraries(${TARGET} glfw OpenGL::GL)
 
-target_link_libraries(${PROJECT_NAME} glfw OpenGL::GL)
