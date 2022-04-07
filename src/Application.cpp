@@ -17,7 +17,7 @@ Application::Application() : m_width(1280), m_height(720), m_window(nullptr){
 	this->init_window();
 }
 
-Application::Application(int w, int h) : m_width(2), m_height(h), m_window(nullptr) {
+Application::Application(int w, int h) : m_width(w), m_height(h), m_window(nullptr) {
 	this->init_window();
 }
 
@@ -27,7 +27,7 @@ void Application::init_window() {
 		std::cerr << "Failed to initialize Application\n";
 		exit(-1);
 	}
-	
+	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 	m_window = glfwCreateWindow(m_width, m_height, m_title, nullptr, nullptr);
 	if (m_window == nullptr) {
 		std::cerr << "Failed to create Application\n";
