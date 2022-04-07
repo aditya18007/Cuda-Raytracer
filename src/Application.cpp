@@ -3,10 +3,14 @@
 //
 
 #include <iostream>
+#include "glad/glad.h"
 #include "Application.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+
+#include "imgui_impl_opengl3_loader.h"
+
 
 static void glfw_error_callback(int error, const char* description)
 {
@@ -55,8 +59,33 @@ Application::~Application() {
 void Application::run() {
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	
+	
+	float vertices[] = {
+			0.8f,  0.8f, 0.8f,  // top right
+			0.8f, -0.8f, 0.8f,  // bottom right
+			-0.8f, -0.8f, 0.8f,  // bottom left
+			-0.8f,  0.8f, 0.8f   // top left
+	};
+	
+	
+	unsigned int VAO;
+	glGenVertexArrays(1, &VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VAO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	
+	unsigned int indices[] = {  // note that we start from 0!
+			0, 1, 3,   // first triangle
+			1, 2, 3    // second triangle
+	};
+	
+	unsigned int EBO;
+	glGenBuffers(1, &EBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+	
 	while (!glfwWindowShouldClose(m_window))
 	{
+		
 		glfwPollEvents();
 		
 		ImGui_ImplOpenGL3_NewFrame();
@@ -69,13 +98,18 @@ void Application::run() {
 			ImGui::End();
 		}
 		
-		
 		ImGui::Render();
 		int display_w, display_h;
 		glfwGetFramebufferSize(m_window, &display_w, &display_h);
 		glViewport(0, 0, display_w, display_h);
 		glClearColor(m_clear_color.x * m_clear_color.w, m_clear_color.y * m_clear_color.w, m_clear_color.z * m_clear_color.w, m_clear_color.w);
 		glClear(GL_COLOR_BUFFER_BIT);
+		
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+		
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		glfwSwapBuffers(m_window);
 	}
