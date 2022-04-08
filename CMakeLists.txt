@@ -26,7 +26,7 @@ set(
 
         #Helios
         src/main.cpp
-        src/test.cu
+        src/ray_tracer.cu
         src/Application.cpp
 
         #glad

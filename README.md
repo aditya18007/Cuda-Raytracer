@@ -12,4 +12,4 @@ Helios is a CUDA based ray-tracer.
   * https://learnopengl.com/Getting-started/Hello-Triangle
 
 * CUDA OpenGL interoperability
-  * 
+  * https://github.com/m516/CV-Sandbox/tree/master/src/08-CUDA-and-OpenGL
