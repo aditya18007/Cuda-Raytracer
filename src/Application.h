@@ -13,7 +13,7 @@ class Application {
 	const int m_width;
 	const int m_height;
 	static constexpr char const * m_title = "Helios";
-	static constexpr char const * m_glsl_version = "#version 330";
+	static constexpr char const * m_glsl_version = "#version 460";
 	const ImVec4 m_clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 	GLFWwindow* m_window;
 	

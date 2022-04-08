@@ -11,7 +11,7 @@
 #include "imgui_impl_opengl3.h"
 
 #include "imgui_impl_opengl3_loader.h"
-
+#include "stb_image.h"
 
 static void glfw_error_callback(int error, const char* description)
 {
@@ -85,7 +85,13 @@ void Application::init_window() {
 		std::cerr << "Failed to create Application\n";
 		exit(-1);
 	}
+	
 	glfwMakeContextCurrent(m_window);
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	{
+		std::cout << "Failed to initialize GLAD" << std::endl;
+		exit(-1);
+	}
 	glfwSwapInterval(1); // Enable vsync
 	
 	IMGUI_CHECKVERSION();
@@ -108,10 +114,11 @@ void Application::run() {
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	
 	float vertices[] = {
-			0.8f , 0.8f,  // top right
-			0.8f , -0.8f,  // bottom right
-			-0.8f, -0.8f, // bottom left
-			-0.8f, 0.8f  // top left
+		//<---position------->  <---tex_coords--->
+	  0.8f, 0.8f, 1.0f , 1.0f,// top right
+	  0.8f,-0.8f, 1.0f , 0.0f,// bottom right
+	 -0.8f,-0.8f, 0.0f, 0.0f,// bottom left
+	-0.8f,0.8f, 0.0f, 1.0f// top left
 	};
 	
 	unsigned int indices[] = {  // note that we start from 0!
@@ -129,7 +136,39 @@ void Application::run() {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 	
+	//Position
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), nullptr);
+	glEnableVertexAttribArray(0);
+	
+	//Texture
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (GLvoid*)(2* sizeof(float)));
+	glEnableVertexAttribArray(1);
+	
 	unsigned int shaderProgram = get_shader_program("vertex_shader.glsl", "fragment_shader.glsl");
+	
+	unsigned int texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
+	// set the texture wrapping parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// set texture filtering parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// load image, create texture and generate mipmaps
+	int width, height, nrChannels;
+	// The FileSystem::getPath(...) is part of the GitHub repository so we can find files on any IDE/platform; replace it with your own image path.
+	unsigned char *data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+	stbi_image_free(data);
 	
 	while (!glfwWindowShouldClose(m_window))
 	{
@@ -153,11 +192,14 @@ void Application::run() {
 		glViewport(0, 0, display_w, display_h);
 		glClearColor(m_clear_color.x * m_clear_color.w, m_clear_color.y * m_clear_color.w, m_clear_color.z * m_clear_color.w, m_clear_color.w);
 		glClear(GL_COLOR_BUFFER_BIT);
+		
+		glBindTexture(GL_TEXTURE_2D, texture);
+		
 		glUseProgram(shaderProgram);
+		
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), nullptr);
-		glEnableVertexAttribArray(0);
+		
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		glfwSwapBuffers(m_window);
 	}
