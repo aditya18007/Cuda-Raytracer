@@ -8,11 +8,11 @@
 
 class Quad {
 	float m_vertices[16] = {
-			//<---position------->  <---tex_coords--->
-			0.9f, 0.9f, 1.0f , 1.0f,// top right
-			0.9f,-0.9f, 1.0f , 0.0f,// bottom right
-			-0.9f,-0.9f, 0.0f, 0.0f,// bottom left
-			-0.9f,0.9f, 0.0f, 1.0f// top left
+			//<-position->  <-tex_coords->
+			1.0f, 1.0f, 1.0f , 1.0f,// top right
+			1.0f,-1.0f, 1.0f , 0.0f,// bottom right
+			-1.0f,-1.0f, 0.0f, 0.0f,// bottom left
+			-1.0f,1.0f, 0.0f, 1.0f// top left
 	};
 	
 	unsigned int m_indices[6] = {
@@ -20,8 +20,8 @@ class Quad {
 			1, 2, 3    // second triangle
 	};
 	
-	unsigned int m_VAO;
-	unsigned int m_EBO;
+	unsigned int m_VAO{};
+	unsigned int m_EBO{};
 public:
 	Quad();
 	void enable_attributes();

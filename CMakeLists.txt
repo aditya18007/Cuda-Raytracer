@@ -30,7 +30,8 @@ set(
         src/Application.cpp
         src/Shader.cpp
         src/Quad.cpp
-        src/stb_image.cpp
+        src/Frame.cpp
+
         #glad
         ext/glad/src/glad.c
 

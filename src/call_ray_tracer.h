@@ -4,5 +4,6 @@
 
 #ifndef HELIOS_TEMP_H
 #define HELIOS_TEMP_H
-extern void launch_kernel();
+#include <cuda_runtime.h>
+extern void launch_kernel(cudaSurfaceObject_t surface, int textureWidth, int textureHeight, int i);
 #endif //HELIOS_TEMP_H

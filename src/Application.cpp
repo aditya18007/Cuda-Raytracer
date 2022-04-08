@@ -10,9 +10,11 @@
 #include "imgui_impl_opengl3.h"
 
 #include "imgui_impl_opengl3_loader.h"
-#include "stb_image.h"
 #include "Shader.h"
 #include "Quad.h"
+#include <cuda.h>
+#include "call_ray_tracer.h"
+#include "Frame.h"
 
 static void glfw_error_callback(int error, const char* description)
 {
@@ -66,38 +68,16 @@ Application::~Application() {
 
 void Application::run() {
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
-
-	unsigned int texture;
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-	// set the texture wrapping parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	// set texture filtering parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	// load image, create texture and generate mipmaps
-	int width, height, nrChannels;
-	// The FileSystem::getPath(...) is part of the GitHub repository so we can find files on any IDE/platform; replace it with your own image path.
-	unsigned char *data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
-	stbi_image_free(data);
-	
+	Frame f(m_width, m_height);
 	Quad q;
 	q.enable_attributes();
 	Shader shader("vertex_shader.glsl", "fragment_shader.glsl");
 	shader.compile();
+	int i = 0;
 	while (!glfwWindowShouldClose(m_window))
 	{
 		
+		launch_kernel(f.get_bitmap_surface(), m_width, m_height, i++);
 		glfwPollEvents();
 		
 		ImGui_ImplOpenGL3_NewFrame();
@@ -118,7 +98,7 @@ void Application::run() {
 		glClearColor(m_clear_color.x * m_clear_color.w, m_clear_color.y * m_clear_color.w, m_clear_color.z * m_clear_color.w, m_clear_color.w);
 		glClear(GL_COLOR_BUFFER_BIT);
 		
-		glBindTexture(GL_TEXTURE_2D, texture);
+		glBindTexture(GL_TEXTURE_2D, f.get_texture_ID());
 		
 		shader.use();
 		q.draw();
