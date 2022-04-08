@@ -5,5 +5,7 @@
 #ifndef HELIOS_TEMP_H
 #define HELIOS_TEMP_H
 #include "Frame.h"
-extern void compute_frame(Frame& frame);
+#include "Camera.h"
+
+extern void compute_frame(Frame& frame, const Camera& camera);
 #endif //HELIOS_TEMP_H

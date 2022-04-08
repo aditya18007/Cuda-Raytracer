@@ -15,6 +15,7 @@
 #include "Quad.h"
 #include "Update_frame.h"
 #include "Frame.h"
+#include "Camera.h"
 
 static void glfw_error_callback(int error, const char* description)
 {
@@ -68,6 +69,8 @@ Application::~Application() {
 
 void Application::run() {
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	io.WantCaptureKeyboard = true;
+	io.WantCaptureMouse = true;
 	
 	Quad quad;
 	quad.enable_attributes();
@@ -77,10 +80,12 @@ void Application::run() {
 	
 	Frame frame(m_width, m_height);
 	
+	Camera camera(m_width, m_height);
+	
 	while (!glfwWindowShouldClose(m_window))
 	{
 		
-		compute_frame(frame);
+		
 		glfwPollEvents();
 		
 		ImGui_ImplOpenGL3_NewFrame();
@@ -88,11 +93,51 @@ void Application::run() {
 		ImGui::NewFrame();
 		
 		{
-			ImGui::Begin("Statistics");
+			ImGui::Begin("Information");
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			ImGui::End();
 		}
 		
+		{
+			ImGui::Begin("Camera");
+			
+			if (ImGui::IsMouseDown(1)) {
+				camera.update_mouse_pos(io.MousePos.x, io.MousePos.y);
+				ImGui::Text("Pressed Right Mouse Button: Angle change active");
+			}
+			
+			if(ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_W))){
+				camera.update_keyboard(Helios_Key::UP);
+				ImGui::Text("Key Input : W (UP)");
+			}
+			
+			else if(ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_A))){
+				camera.update_keyboard(Helios_Key::LEFT);
+				ImGui::Text("Key Input : A (LEFT)");
+			}
+			
+			else if(ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_S))){
+				camera.update_keyboard(Helios_Key::DOWN);
+				ImGui::Text("Key Input : S (DOWN)");
+			}
+			
+			else if(ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_D))){
+				camera.update_keyboard(Helios_Key::RIGHT);
+				ImGui::Text("Key Input : D (RIGHT)");
+			}
+			ImGui::End();
+		}
+		
+		camera.update();
+		compute_frame(frame, camera);
+		{
+			ImGui::Begin("Debug");
+			auto pos = camera.get_camera_position();
+			auto tgt = camera.get_camera_target();
+			ImGui::Text("Camera Position = %f, %f, %f", pos.x, pos.y, pos.z );
+			ImGui::Text("Target Vector = %f, %f, %f", tgt.x, tgt.y, tgt.z );
+			ImGui::End();
+		}
 		ImGui::Render();
 		
 		int display_w, display_h;

@@ -20,6 +20,7 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
 add_subdirectory(ext/glfw)
+add_subdirectory(ext/glm)
 
 set(
         SOURCES
@@ -31,7 +32,7 @@ set(
         src/Shader.cpp
         src/Quad.cpp
         src/Frame.cpp
-
+        src/Camera.cpp
         #glad
         ext/glad/src/glad.c
 
@@ -53,6 +54,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CUDAToolkit_INCLUDE_DIRS}
         ext/glad/include
         ext/glfw/include
         ext/imgui/
+        ext/glm/
         )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -63,4 +65,4 @@ target_compile_options(${PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
         --keep # Keep PTX code
         >)
 
-target_link_libraries(${TARGET} glfw OpenGL::GL)
+target_link_libraries(${TARGET} glfw OpenGL::GL glm::glm)

@@ -2,6 +2,8 @@
 #include <cstdio>
 #include <cstdint>
 #include "Frame.h"
+#include "Camera.h"
+
 using namespace std;
 
 
@@ -18,9 +20,11 @@ __global__ void ray_trace(cudaSurfaceObject_t surface, int textureWidth, int tex
 		return;
 	
 	//Calculate the pretty colors
-	float red = blockIdx.x*5;
-	float green = blockIdx.y*8;
-	float blue = 0.0f;
+	float c_x = blockIdx.x* (255/gridDim.x);
+	float c_y = blockIdx.y*(255/gridDim.y);
+	float red = 0.0f;
+	float green = c_x;
+	float blue = c_y;
 	
 	//Convert each value to an unsigned byte
 	uchar4 pixel = { (uint8_t)(red),
@@ -32,7 +36,7 @@ __global__ void ray_trace(cudaSurfaceObject_t surface, int textureWidth, int tex
 	surf2Dwrite(pixel, surface, x * sizeof(uchar4), y);
 }
 
-void compute_frame(Frame& frame){
+void compute_frame(Frame& frame, const Camera& camera){
 	
 	int width = frame.get_width();
 	int height = frame.get_height();
