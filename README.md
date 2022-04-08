@@ -1,7 +1,14 @@
-<p align="center">   <img      width="100"     height="100"     src="https://github.com/aditya18007/Cuda-Raytracer/blob/main/assets/logo.svg"   > </p>
+<p align="center">   <img      width="100"     height="100"     src="https://github.com/aditya18007/Cuda-Raytracer/blob/main/assets/images/logo.svg"   > </p>
+
 # Helios
 
 Helios is a CUDA based ray-tracer.
+
+### Visualising Blocks 
+
+* Following image shows the blocks that compute color for each region of screen.
+
+![](assets/images/visualising_blocks.png)
 
 ### Resources
 

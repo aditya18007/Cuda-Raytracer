@@ -26,7 +26,7 @@ set(
 
         #Helios
         src/main.cpp
-        src/ray_tracer.cu
+        src/Ray_tracer.cu
         src/Application.cpp
         src/Shader.cpp
         src/Quad.cpp

@@ -16,8 +16,12 @@ class Frame {
 	cudaSurfaceObject_t m_bitmap_surface;
 public:
 	Frame(int width, int height);
+	int get_width();
+	int get_height();
+	
 	cudaSurfaceObject_t get_bitmap_surface();
 	GLuint get_texture_ID();
+	
 };
 
 

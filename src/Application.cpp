@@ -5,15 +5,15 @@
 #include <iostream>
 #include "glad/glad.h"
 #include "Application.h"
+
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
-
 #include "imgui_impl_opengl3_loader.h"
+
 #include "Shader.h"
 #include "Quad.h"
-#include <cuda.h>
-#include "call_ray_tracer.h"
+#include "Update_frame.h"
 #include "Frame.h"
 
 static void glfw_error_callback(int error, const char* description)
@@ -68,16 +68,19 @@ Application::~Application() {
 
 void Application::run() {
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
-	Frame f(m_width, m_height);
-	Quad q;
-	q.enable_attributes();
+	
+	Quad quad;
+	quad.enable_attributes();
+	
 	Shader shader("vertex_shader.glsl", "fragment_shader.glsl");
 	shader.compile();
-	int i = 0;
+	
+	Frame frame(m_width, m_height);
+	
 	while (!glfwWindowShouldClose(m_window))
 	{
 		
-		launch_kernel(f.get_bitmap_surface(), m_width, m_height, i++);
+		compute_frame(frame);
 		glfwPollEvents();
 		
 		ImGui_ImplOpenGL3_NewFrame();
@@ -98,10 +101,10 @@ void Application::run() {
 		glClearColor(m_clear_color.x * m_clear_color.w, m_clear_color.y * m_clear_color.w, m_clear_color.z * m_clear_color.w, m_clear_color.w);
 		glClear(GL_COLOR_BUFFER_BIT);
 		
-		glBindTexture(GL_TEXTURE_2D, f.get_texture_ID());
+		glBindTexture(GL_TEXTURE_2D, frame.get_texture_ID());
 		
 		shader.use();
-		q.draw();
+		quad.draw();
 		
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		glfwSwapBuffers(m_window);

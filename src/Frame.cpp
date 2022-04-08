@@ -43,3 +43,11 @@ cudaSurfaceObject_t Frame::get_bitmap_surface() {
 GLuint Frame::get_texture_ID() {
 	return m_textureID;
 }
+
+int Frame::get_width() {
+	return m_width;
+}
+
+int Frame::get_height() {
+	return m_height;
+}
