@@ -9,10 +9,10 @@
 class Quad {
 	float m_vertices[16] = {
 			//<---position------->  <---tex_coords--->
-			0.8f, 0.8f, 1.0f , 1.0f,// top right
-			0.8f,-0.8f, 1.0f , 0.0f,// bottom right
-			-0.8f,-0.8f, 0.0f, 0.0f,// bottom left
-			-0.8f,0.8f, 0.0f, 1.0f// top left
+			0.9f, 0.9f, 1.0f , 1.0f,// top right
+			0.9f,-0.9f, 1.0f , 0.0f,// bottom right
+			-0.9f,-0.9f, 0.0f, 0.0f,// bottom left
+			-0.9f,0.9f, 0.0f, 1.0f// top left
 	};
 	
 	unsigned int m_indices[6] = {

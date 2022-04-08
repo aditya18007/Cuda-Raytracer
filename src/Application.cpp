@@ -3,7 +3,6 @@
 //
 
 #include <iostream>
-#include <fstream>
 #include "glad/glad.h"
 #include "Application.h"
 #include "imgui.h"
