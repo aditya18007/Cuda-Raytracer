@@ -12,57 +12,10 @@
 
 #include "imgui_impl_opengl3_loader.h"
 #include "stb_image.h"
-
+#include "Shader.h"
 static void glfw_error_callback(int error, const char* description)
 {
 	fprintf(stderr, "Glfw Error %d: %s\n", error, description);
-}
-
-unsigned int get_shader(const std::string& filename, GLenum shaderType){
-	std::string pwd(__FILE__);
-	
-	auto last = pwd.find_last_of('/');
-	auto directory = pwd.substr(0, last);
-	directory += "/Shaders/";
-	auto shader_location = directory + filename;
-	std::ifstream shader_file(shader_location);
-	std::string file_contents((std::istreambuf_iterator<char>(shader_file)),
-	                          std::istreambuf_iterator<char>());
-	unsigned int shader = glCreateShader(shaderType);
-	const char * c_str_fragment_shader= file_contents.c_str();
-	glShaderSource(shader, 1, &c_str_fragment_shader, nullptr);
-	glCompileShader(shader);
-	int success;
-	char infoLog[512];
-	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-	if (!success)
-	{
-		glGetShaderInfoLog(shader, 512, nullptr, infoLog);
-		std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-	}
-	return shader;
-}
-
-unsigned int get_shader_program(const std::string& vertex_shader_file,const std::string& fragment_shader_file){
-	unsigned int vertexShader = get_shader(vertex_shader_file, GL_VERTEX_SHADER);
-	unsigned int fragmentShader = get_shader(fragment_shader_file, GL_FRAGMENT_SHADER);
-	unsigned int shaderProgram = glCreateProgram();
-	glAttachShader(shaderProgram, fragmentShader);
-	glAttachShader(shaderProgram, vertexShader);
-	glLinkProgram(shaderProgram);
-	
-	int success;
-	char infoLog[512];
-	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-	
-	
-	if (!success) {
-		glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
-		std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
-	}
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
-	return shaderProgram;
 }
 
 Application::Application() : m_width(1280), m_height(720), m_window(nullptr){
@@ -144,8 +97,6 @@ void Application::run() {
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (GLvoid*)(2* sizeof(float)));
 	glEnableVertexAttribArray(1);
 	
-	unsigned int shaderProgram = get_shader_program("vertex_shader.glsl", "fragment_shader.glsl");
-	
 	unsigned int texture;
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
@@ -169,7 +120,8 @@ void Application::run() {
 		std::cout << "Failed to load texture" << std::endl;
 	}
 	stbi_image_free(data);
-	
+	Shader shader("vertex_shader.glsl", "fragment_shader.glsl");
+	shader.compile();
 	while (!glfwWindowShouldClose(m_window))
 	{
 		
@@ -195,7 +147,7 @@ void Application::run() {
 		
 		glBindTexture(GL_TEXTURE_2D, texture);
 		
-		glUseProgram(shaderProgram);
+		shader.use();
 		
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
