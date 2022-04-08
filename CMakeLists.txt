@@ -29,6 +29,7 @@ set(
         src/ray_tracer.cu
         src/Application.cpp
         src/Shader.cpp
+        src/Quad.cpp
         src/stb_image.cpp
         #glad
         ext/glad/src/glad.c

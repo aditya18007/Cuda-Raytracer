@@ -13,6 +13,8 @@
 #include "imgui_impl_opengl3_loader.h"
 #include "stb_image.h"
 #include "Shader.h"
+#include "Quad.h"
+
 static void glfw_error_callback(int error, const char* description)
 {
 	fprintf(stderr, "Glfw Error %d: %s\n", error, description);
@@ -65,38 +67,7 @@ Application::~Application() {
 
 void Application::run() {
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
-	
-	float vertices[] = {
-		//<---position------->  <---tex_coords--->
-	  0.8f, 0.8f, 1.0f , 1.0f,// top right
-	  0.8f,-0.8f, 1.0f , 0.0f,// bottom right
-	 -0.8f,-0.8f, 0.0f, 0.0f,// bottom left
-	-0.8f,0.8f, 0.0f, 1.0f// top left
-	};
-	
-	unsigned int indices[] = {  // note that we start from 0!
-			0, 1, 3,   // first triangle
-			1, 2, 3    // second triangle
-	};
-	
-	unsigned int VAO;
-	glGenVertexArrays(1, &VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VAO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	
-	unsigned int EBO;
-	glGenBuffers(1, &EBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-	
-	//Position
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), nullptr);
-	glEnableVertexAttribArray(0);
-	
-	//Texture
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (GLvoid*)(2* sizeof(float)));
-	glEnableVertexAttribArray(1);
-	
+
 	unsigned int texture;
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
@@ -120,6 +91,9 @@ void Application::run() {
 		std::cout << "Failed to load texture" << std::endl;
 	}
 	stbi_image_free(data);
+	
+	Quad q;
+	q.enable_attributes();
 	Shader shader("vertex_shader.glsl", "fragment_shader.glsl");
 	shader.compile();
 	while (!glfwWindowShouldClose(m_window))
@@ -148,9 +122,7 @@ void Application::run() {
 		glBindTexture(GL_TEXTURE_2D, texture);
 		
 		shader.use();
-		
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+		q.draw();
 		
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		glfwSwapBuffers(m_window);
