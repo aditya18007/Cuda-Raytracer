@@ -5,9 +5,9 @@
 int main(int, char**)
 {
 	
-	Object_Loader loader("sofa.obj");
-	Application a(WIDTH,HEIGHT );
-	a.run(loader);
-	
+	Object_Loader loader("backpack.obj");
+//	Application a(WIDTH,HEIGHT );
+//	a.run(loader);
+	auto* scene = loader.get_scene();
 	return 0;
 }

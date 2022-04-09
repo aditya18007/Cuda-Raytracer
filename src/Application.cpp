@@ -68,6 +68,7 @@ Application::~Application() {
 }
 
 void Application::run( Object_Loader& loader ) {
+	
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	io.WantCaptureKeyboard = true;
 	io.WantCaptureMouse = true;

@@ -1,5 +1,4 @@
 <p align="center">   <img      width="100"     height="100"     src="https://github.com/aditya18007/Cuda-Raytracer/blob/main/assets/logo.svg"   > </p>
-
 # Helios
 
 Helios is a CUDA based ray-tracer.
@@ -12,6 +11,9 @@ Helios is a CUDA based ray-tracer.
 
 ### Resources
 
+* General:
+  * My own implementation of Ray Tracer in OpenGL shaders.
+  * https://github.com/CSE-333-Computer-Graphics-2020
 * `Imgui` setup:
   * https://github.com/m516/CV-Sandbox/blob/master/src/03-Hello-ImGui/main.cpp
   * https://github.com/ocornut/imgui
@@ -21,3 +23,6 @@ Helios is a CUDA based ray-tracer.
   * https://github.com/JoeyDeVries/LearnOpenGL/blob/master/src/1.getting_started/4.1.textures/textures.cpp 
 * CUDA OpenGL interoperability
   * https://github.com/m516/CV-Sandbox/tree/master/src/08-CUDA-and-OpenGL
+* Mesh Loading
+  * https://assimp-docs.readthedocs.io/en/v5.1.0/usage/use_the_lib.html
+  * https://github.com/JoeyDeVries/LearnOpenGL (Model, Mesh, Vertex class from here)
