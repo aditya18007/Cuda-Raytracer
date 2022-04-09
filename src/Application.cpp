@@ -82,7 +82,7 @@ void Application::run() {
 	
 	Camera camera;
 	float angle[3]{0};
-	float speed{1.0};
+	float speed{3.0};
 	float last_time = glfwGetTime();
 	while (!glfwWindowShouldClose(m_window))
 	{
@@ -94,10 +94,22 @@ void Application::run() {
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 		
-				{
+		{
 			ImGui::Begin("Helios");
-			ImGui::SliderFloat3("Angle of rotation of Camera", angle, -3.14f, 3.14f);
-			ImGui::SliderFloat("Camera Speed", &speed, 0.0f, 5.0f);
+			ImGui::DragFloat3("Angle of rotation of Camera", angle, 0.005f, -3.14, 3.14f );
+			
+			if (ImGui::Button("Reset Orientation")){
+				angle[0] = 0;
+				angle[1] = 0;
+				angle[2] = 0;
+			}
+			
+			if (ImGui::Button("Reset Location")){
+				camera.reset_location();
+			}
+			
+			ImGui::SliderFloat("Camera Speed", &speed, 0.0f, 10.0f);
+			
 			ImGui::Text("Use w, a, s, d to move camera.");
 			if(ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_W))){
 				camera.update_key(Helios_Key::UP);
@@ -124,14 +136,21 @@ void Application::run() {
 			float curr_time = glfwGetTime();
 			float delta_time = curr_time - last_time;
 			last_time = curr_time;
-			camera.update(speed, delta_time, angle[0], angle[1], angle[2]);
+			
+			/*
+			Given that negative z-axis is pointing towards screen,
+			 * x-axis is pointing up (along height of screen)
+			 * y-axis is pointing right (along width of screen)
+			 * I am passing x and y in place of each other to help users
+			   maintain general notation of axes:
+					1. x-axis along width
+					2. y-axis along height
+			*/
+			camera.update(speed, delta_time, angle[1], angle[0], angle[2]);
 			compute_frame(frame, camera);
-			auto pos = camera.get_camera_position();
-			auto tgt = camera.get_camera_target();
-					ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			ImGui::End();
 		}
-		
 		
 		ImGui::Render();
 		

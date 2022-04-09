@@ -50,7 +50,7 @@ __global__ void ray_trace(cudaSurfaceObject_t surface, const glm::vec3 camera_ta
 		return;
 	if(y >= HEIGHT)
 		return;
-//
+
 	glm::vec3 camera_up(0.0, 1.0, 0.0);
 	
 	float aspect = 2;
@@ -70,8 +70,7 @@ __global__ void ray_trace(cudaSurfaceObject_t surface, const glm::vec3 camera_ta
 	
 
 
-	glm::vec3 dir(0,0,0);
-	dir += -w * 1.2071067811865475f;
+	glm::vec3 dir = -w * 1.2071067811865475f;
 	
 	float xw = 0.0011111111111111111f*x - 0.9994444444444445;
 	//450 is Height/2

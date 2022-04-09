@@ -30,7 +30,7 @@ public:
 	Camera();
 	
 	void update_key(Helios_Key key);
-	
+	void reset_location();
 	void update(float movement_speed, float deltaTime, float theta_x, float theta_y, float theta_z);
 	glm::vec3 get_camera_position() const;
 	glm::vec3 get_camera_target() const;

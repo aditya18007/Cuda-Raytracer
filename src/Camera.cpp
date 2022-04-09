@@ -2,16 +2,11 @@
 // Created by aditya on 08/04/22.
 //
 
-#include <cmath>
-#include <iostream>
-#include <utility>
-#include <cmath>
 #include "glm/glm.hpp"
 #include "glm/geometric.hpp"
 #include "Camera.h"
-#include "GLFW/glfw3.h"
-#include "glm/ext/matrix_transform.hpp"
 #include "glm/gtx/rotate_vector.hpp"
+
 Camera::Camera()
 : lookAt(0, 0, 0), lookFrom(0, 0, 5),
 current_key(Helios_Key::NONE),
@@ -47,29 +42,32 @@ void Camera::update( float movement_speed, float deltaTime ,  float new_x, float
 	direction = glm::rotateZ(direction, theta_z);
 	
 	lookAt = lookFrom + direction;
+	
+	//Normalization is important so that forward-backward and left-right speed are same
 	direction = glm::normalize(direction);
 	auto right = glm::normalize(glm::cross(direction, glm::vec3(0.0f,1.0f,0.0f)));
+	
 	if ( current_key == Helios_Key::UP){
 		//Up
 		auto delta_t =  direction* deltaTime * movement_speed;
 		lookAt += delta_t;
 		lookFrom += delta_t;
 	}
-	// Move backward
+	
 	if (current_key == Helios_Key::DOWN){
 		//Down
 		auto delta_t = direction * deltaTime * movement_speed;
 		lookAt -= delta_t;
 		lookFrom -= delta_t;
 	}
-	// Strafe right
+	
 	if (current_key == Helios_Key::RIGHT){
 		//Right
 		auto delta_t = right * deltaTime * movement_speed;
 		lookAt += delta_t;
 		lookFrom += delta_t;
 	}
-	// Strafe left
+	
 	if (current_key == Helios_Key::LEFT){
 		//Left
 		auto delta_t = right * deltaTime * movement_speed;
@@ -77,4 +75,13 @@ void Camera::update( float movement_speed, float deltaTime ,  float new_x, float
 		lookFrom -= delta_t;
 	}
 	current_key = Helios_Key::NONE;
+}
+
+
+void Camera::reset_location() {
+	lookFrom = glm::vec3(0,0,5);
+	lookAt = glm::vec3(0,0,0);
+	angle_x = 0;
+	angle_y = 0;
+	angle_z = 0;
 }
