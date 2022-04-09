@@ -103,9 +103,11 @@ void Application::run() {
 			
 			if (ImGui::IsMouseDown(1)) {
 				camera.update_mouse_pos(io.MousePos.x, io.MousePos.y);
-				ImGui::Text("Pressed Right Mouse Button: Angle change active");
+				ImGui::Text("Pressed Right Mouse Button: Orientation change active");
+			} else {
+				ImGui::Text("Press Right Mouse Button to change orientation.");
 			}
-			
+			ImGui::Text("Use w, a, s, d to move camera.");
 			if(ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_W))){
 				camera.update_keyboard(Helios_Key::UP);
 				ImGui::Text("Key Input : W (UP)");
@@ -125,19 +127,19 @@ void Application::run() {
 				camera.update_keyboard(Helios_Key::RIGHT);
 				ImGui::Text("Key Input : D (RIGHT)");
 			}
-			ImGui::End();
-		}
-		
-		camera.update();
-		compute_frame(frame, camera);
-		{
-			ImGui::Begin("Debug");
+			else {
+				ImGui::Text("Key Input : ");
+			}
+			camera.update();
+			compute_frame(frame, camera);
 			auto pos = camera.get_camera_position();
 			auto tgt = camera.get_camera_target();
 			ImGui::Text("Camera Position = %f, %f, %f", pos.x, pos.y, pos.z );
 			ImGui::Text("Target Vector = %f, %f, %f", tgt.x, tgt.y, tgt.z );
 			ImGui::End();
 		}
+		
+		
 		ImGui::Render();
 		
 		int display_w, display_h;

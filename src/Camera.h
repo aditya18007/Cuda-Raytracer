@@ -16,7 +16,8 @@ enum class Helios_Key{
 };
 
 enum class Camera_State{
-	UPDATE_NEEDED,
+	MOUSE_UPDATE_NEEDED,
+	KEYBOARD_UPDATE_NEEDED,
 	STILL
 };
 
@@ -25,7 +26,6 @@ class Camera {
 	const int m_height;
 	
 	float mouse_x, mouse_y;
-	glm::vec3 position = glm::vec3( 0, 0, 5 );
 	float horizontalAngle = 3.14f;
 	float verticalAngle = 0.0f;
 	float initialFoV = 45.0f;
@@ -36,18 +36,19 @@ class Camera {
 	
 	Helios_Key curr_key{};
 	
-	glm::vec3 m_camPos{};
-	glm::vec3 m_camTarget{};
+	glm::vec3 m_camPos= glm::vec3(0.0f, 0.0f, 5.0f);
+	glm::vec3 m_camTarget = glm::vec3(0.0f, 0.0f, 0.0f);
 	
-	Camera_State camera_state{Camera_State::STILL};
+	Camera_State camera_state_orientation{Camera_State::STILL};
+	Camera_State camera_state_position{Camera_State::STILL};
 public:
 	Camera(int width, int height);
 	void update_mouse_pos(float x, float y);
 	void update_keyboard(Helios_Key key);
 	void update();
 	
-	glm::vec3 get_camera_position();
-	glm::vec3 get_camera_target();
+	glm::vec3 get_camera_position() const;
+	glm::vec3 get_camera_target() const;
 };
 
 
