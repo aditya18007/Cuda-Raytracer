@@ -40,11 +40,10 @@ void Camera::update( float movement_speed, float deltaTime ,  float new_x, float
 	direction = glm::rotateX(direction, theta_x);
 	direction = glm::rotateY(direction, theta_y);
 	direction = glm::rotateZ(direction, theta_z);
-	
+	direction = glm::normalize(direction);
 	lookAt = lookFrom + direction;
 	
 	//Normalization is important so that forward-backward and left-right speed are same
-	direction = glm::normalize(direction);
 	auto right = glm::normalize(glm::cross(direction, glm::vec3(0.0f,1.0f,0.0f)));
 	
 	if ( current_key == Helios_Key::UP){
@@ -74,6 +73,12 @@ void Camera::update( float movement_speed, float deltaTime ,  float new_x, float
 		lookAt -= delta_t;
 		lookFrom -= delta_t;
 	}
+	
+	//See previous commit to see calculations in Cuda Kernel itself.
+	//Reduced burden from there to here.
+	u = -right;
+	v = glm::normalize(cross(direction, u));
+	dir = -direction * 1.2071067811865475f;
 	current_key = Helios_Key::NONE;
 }
 
@@ -84,4 +89,16 @@ void Camera::reset_location() {
 	angle_x = 0;
 	angle_y = 0;
 	angle_z = 0;
+}
+
+glm::vec3 Camera::get_u() const {
+	return u;
+}
+
+glm::vec3 Camera::get_v() const {
+	return v;
+}
+
+glm::vec3 Camera::get_dir() const {
+	return dir;
 }

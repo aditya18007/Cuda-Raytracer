@@ -29,17 +29,17 @@ struct Sphere {
 	Material m;
 };
 
-__device__ bool intersect(Ray r, Sphere s) {
+__device__ bool intersect(Ray& r, Sphere& s) {
 	float a = glm::dot(r.direction,r.direction);
 	float b = glm::dot(r.direction, (r.origin-s.origin)*2.0f );
-	float c = glm::dot(s.origin, s.origin) + dot(r.origin,r.origin) +-2.0*dot(r.origin,s.origin) - (s.radius*s.radius);
+	float c = glm::dot(s.origin, s.origin) + glm::dot(r.origin,r.origin) +-2.0*glm::dot(r.origin,s.origin) - (s.radius*s.radius);
 	
 	if (b*b < 4*a*c){
 		return false;
 	}
 	return true;
 }
-__global__ void ray_trace(cudaSurfaceObject_t surface, const glm::vec3 camera_target, const glm::vec3 camera_pos)
+__global__ void ray_trace(cudaSurfaceObject_t surface, const glm::vec3 camera_pos, glm::vec3 u, glm::vec3 v, glm::vec3 dir)
 {
 	
 	//pixel index
@@ -50,10 +50,6 @@ __global__ void ray_trace(cudaSurfaceObject_t surface, const glm::vec3 camera_ta
 		return;
 	if(y >= HEIGHT)
 		return;
-
-	glm::vec3 camera_up(0.0, 1.0, 0.0);
-	
-	float aspect = 2;
 	
 	float SMALLEST_DIST = 1e-4;
 	float FLT_MAX =  3.402823466e+38;
@@ -62,15 +58,6 @@ __global__ void ray_trace(cudaSurfaceObject_t surface, const glm::vec3 camera_ta
 	World world;
 	world.bgcolor = glm::vec3(0.28, 0.28, 0.28);
 
-	//	glm::vec3 line_of_sight = camera_target - camera_pos;
-	//	glm::vec3 w = -line_of_sight;
-	glm::vec3 w = -glm::normalize(camera_pos - camera_target);
-	glm::vec3 u = glm::normalize(glm::cross(camera_up, w));
-	glm::vec3 v = glm::normalize(cross(w, u));
-	
-
-
-	glm::vec3 dir = -w * 1.2071067811865475f;
 	
 	float xw = 0.0011111111111111111f*x - 0.9994444444444445;
 	//450 is Height/2
@@ -122,6 +109,6 @@ void compute_frame(Frame& frame, const Camera& camera){
 	
 	dim3 grid_shape = dim3( num_blocks_x, num_blocks_y , 1);
 	
-	ray_trace<<<grid_shape, block_shape>>>(surface, camera.get_camera_target(), camera.get_camera_position());
+	ray_trace<<<grid_shape, block_shape>>>(surface, camera.get_camera_position(), camera.get_u(), camera.get_v(), camera.get_dir());
 	cudaDeviceSynchronize();
 }
