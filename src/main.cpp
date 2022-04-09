@@ -6,8 +6,7 @@ int main(int, char**)
 {
 	
 	Object_Loader loader("backpack.obj");
-//	Application a(WIDTH,HEIGHT );
-//	a.run(loader);
-	auto* scene = loader.get_scene();
+	Application a(WIDTH,HEIGHT );
+	a.run(loader);
 	return 0;
 }
