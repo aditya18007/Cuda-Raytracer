@@ -22,6 +22,11 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory(ext/glfw)
 add_subdirectory(ext/glm)
 
+set(ASSIMP_BUILD_TESTS OFF)
+set(ASSIMP_BUILD_SAMPLES OFF)
+set(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
+add_subdirectory(ext/assimp)
+
 set(
         SOURCES
 
@@ -55,6 +60,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CUDAToolkit_INCLUDE_DIRS}
         ext/glfw/include
         ext/imgui/
         ext/glm/
+        ext/assimp/include
         )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -65,4 +71,4 @@ target_compile_options(${PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
         --keep # Keep PTX code
         >)
 
-target_link_libraries(${TARGET} glfw OpenGL::GL glm::glm)
+target_link_libraries(${TARGET} glfw OpenGL::GL glm assimp)
