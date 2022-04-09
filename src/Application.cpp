@@ -80,8 +80,10 @@ void Application::run() {
 	
 	Frame frame(m_width, m_height);
 	
-	Camera camera(m_width, m_height);
-	
+	Camera camera;
+	float angle[3]{0};
+	float speed{1.0};
+	float last_time = glfwGetTime();
 	while (!glfwWindowShouldClose(m_window))
 	{
 		
@@ -92,50 +94,41 @@ void Application::run() {
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 		
-		{
-			ImGui::Begin("Information");
-			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-			ImGui::End();
-		}
-		
-		{
-			ImGui::Begin("Camera");
-			
-			if (ImGui::IsMouseDown(1)) {
-				camera.update_mouse_pos(io.MousePos.x, io.MousePos.y);
-				ImGui::Text("Pressed Right Mouse Button: Orientation change active");
-			} else {
-				ImGui::Text("Press Right Mouse Button to change orientation.");
-			}
+				{
+			ImGui::Begin("Helios");
+			ImGui::SliderFloat3("Angle of rotation of Camera", angle, -3.14f, 3.14f);
+			ImGui::SliderFloat("Camera Speed", &speed, 0.0f, 5.0f);
 			ImGui::Text("Use w, a, s, d to move camera.");
 			if(ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_W))){
-				camera.update_keyboard(Helios_Key::UP);
+				camera.update_key(Helios_Key::UP);
 				ImGui::Text("Key Input : W (UP)");
 			}
 			
 			else if(ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_A))){
-				camera.update_keyboard(Helios_Key::LEFT);
+				camera.update_key(Helios_Key::LEFT);
 				ImGui::Text("Key Input : A (LEFT)");
 			}
 			
 			else if(ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_S))){
-				camera.update_keyboard(Helios_Key::DOWN);
+				camera.update_key(Helios_Key::DOWN);
 				ImGui::Text("Key Input : S (DOWN)");
 			}
 			
 			else if(ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_D))){
-				camera.update_keyboard(Helios_Key::RIGHT);
+				camera.update_key(Helios_Key::RIGHT);
 				ImGui::Text("Key Input : D (RIGHT)");
 			}
 			else {
 				ImGui::Text("Key Input : ");
 			}
-			camera.update();
+			float curr_time = glfwGetTime();
+			float delta_time = curr_time - last_time;
+			last_time = curr_time;
+			camera.update(speed, delta_time, angle[0], angle[1], angle[2]);
 			compute_frame(frame, camera);
 			auto pos = camera.get_camera_position();
 			auto tgt = camera.get_camera_target();
-			ImGui::Text("Camera Position = %f, %f, %f", pos.x, pos.y, pos.z );
-			ImGui::Text("Target Vector = %f, %f, %f", tgt.x, tgt.y, tgt.z );
+					ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			ImGui::End();
 		}
 		
