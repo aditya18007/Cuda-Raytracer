@@ -22,27 +22,27 @@ enum class Camera_State{
 };
 
 class Camera {
-	const int m_width;
-	const int m_height;
+	int m_width;
+	int m_height;
 	
 	float mouse_x, mouse_y;
-	float horizontalAngle = 3.14f;
-	float verticalAngle = 0.0f;
-	float initialFoV = 45.0f;
+	float horizontalAngle;
+	float verticalAngle;
 	
-	float speed = 3.0f; // 3 is optimal. Any faster and it gets messy
-	float mouseSpeed = 0.1f;
-	double lastTime{};
+	float speed; // 3 is optimal. Any faster and it gets messy
+	float mouseSpeed;
+	double lastTime;
 	
 	Helios_Key curr_key{};
 	
-	glm::vec3 m_camPos= glm::vec3(0.0f, 0.0f, 5.0f);
-	glm::vec3 m_camTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 m_camPos;
+	glm::vec3 m_camTarget;
 	
 	Camera_State camera_state_orientation{Camera_State::STILL};
 	Camera_State camera_state_position{Camera_State::STILL};
 public:
 	Camera(int width, int height);
+	Camera(glm::vec3 position, glm::vec3 target);
 	void update_mouse_pos(float x, float y);
 	void update_keyboard(Helios_Key key);
 	void update();

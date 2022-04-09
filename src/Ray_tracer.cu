@@ -34,9 +34,7 @@ __device__ bool intersect(Ray r, Sphere s) {
 	float b = glm::dot(r.direction, (r.origin-s.origin)*2.0f );
 	float c = glm::dot(s.origin, s.origin) + dot(r.origin,r.origin) +-2.0*dot(r.origin,s.origin) - (s.radius*s.radius);
 	
-	float disc = b*b + (-4.0)*a*c;
-	
-	if (disc < 0){
+	if (b*b < 4*a*c){
 		return false;
 	}
 	return true;
@@ -52,10 +50,9 @@ __global__ void ray_trace(cudaSurfaceObject_t surface, const glm::vec3 camera_ta
 		return;
 	if(y >= HEIGHT)
 		return;
-	
+//
 	glm::vec3 camera_up(0.0, 1.0, 0.0);
 	
-	float focalDistance = 1.2071067811865475;
 	float aspect = 2;
 	
 	float SMALLEST_DIST = 1e-4;
@@ -64,17 +61,25 @@ __global__ void ray_trace(cudaSurfaceObject_t surface, const glm::vec3 camera_ta
 	
 	World world;
 	world.bgcolor = glm::vec3(0.28, 0.28, 0.28);
-	glm::vec3 line_of_sight = camera_target - camera_pos;
-	glm::vec3 w = -glm::normalize(line_of_sight);
+
+	//	glm::vec3 line_of_sight = camera_target - camera_pos;
+	//	glm::vec3 w = -line_of_sight;
+	glm::vec3 w = -glm::normalize(camera_pos - camera_target);
 	glm::vec3 u = glm::normalize(glm::cross(camera_up, w));
-	glm::vec3 v = normalize(cross(w, u));
+	glm::vec3 v = glm::normalize(cross(w, u));
 	
-	glm::vec3 dir(0.0, 0.0, 0.0);
-	dir += -w * focalDistance;
-	float xw = aspect*(x - WIDTH/2.0 + 0.5)/WIDTH;
-	float yw = (y - HEIGHT/2.0 + 0.5)/HEIGHT;
+
+
+	glm::vec3 dir(0,0,0);
+	dir += -w * 1.2071067811865475f;
+	
+	float xw = 0.0011111111111111111f*x - 0.9994444444444445;
+	//450 is Height/2
+	float yw = (y - 450.0f)/HEIGHT + 0.0005555555555555556;
+	
 	dir += u * xw;
 	dir += v * yw;
+	
 	Ray r{};
 	r.origin = camera_pos;
 	r.direction = normalize(dir);
@@ -92,6 +97,7 @@ __global__ void ray_trace(cudaSurfaceObject_t surface, const glm::vec3 camera_ta
 		                 (uint8_t)(s.m.color.z*255),
 		                 (uint8_t)(1.0*255)};
 		surf2Dwrite(pixel, surface, x * sizeof(uchar4), y);
+		
 	}
 	else{
 		uchar4 pixel = { (uint8_t)(world.bgcolor.x*255),

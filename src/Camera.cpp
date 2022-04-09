@@ -11,13 +11,20 @@
 #include "GLFW/glfw3.h"
 
 Camera::Camera(int width, int height)
-: m_width(width), m_height(height), lastTime(glfwGetTime()), camera_state_position(Camera_State::STILL), camera_state_orientation(Camera_State::STILL), m_camPos(0,0,5)
-{
-	mouse_x = width/2;
-	mouse_y = height/2;
-}
+: m_width(width), m_height(height),
+	lastTime(glfwGetTime()),
+	camera_state_position(Camera_State::STILL),
+	camera_state_orientation(Camera_State::STILL),
+	m_camPos(0,0,5),
+	m_camTarget(0,0,0),
+	mouse_x(900), mouse_y(450),
+	horizontalAngle(3.14f),
+	verticalAngle(0.0f),
+	speed(3.0f), mouseSpeed(0.1f)
+{}
 
 void Camera::update_mouse_pos(float x, float y) {
+	
 	mouse_x = x;
 	mouse_y = y;
 	camera_state_orientation = Camera_State::MOUSE_UPDATE_NEEDED;
@@ -29,7 +36,7 @@ void Camera::update() {
 	auto deltaTime = float(currentTime - lastTime);
 	lastTime = currentTime;
 	if (camera_state_orientation == Camera_State::MOUSE_UPDATE_NEEDED){
-		horizontalAngle += mouseSpeed * deltaTime * float(double(m_width)/2 - mouse_x );
+		horizontalAngle += mouseSpeed * deltaTime * float(double(m_width)/2 - mouse_x ) ;
 		verticalAngle   += mouseSpeed * deltaTime * float(double(m_height)/2 - mouse_y );
 	}
 	
@@ -44,10 +51,10 @@ void Camera::update() {
 			std::sin(verticalAngle),
 			std::cos(verticalAngle) * std::cos(horizontalAngle)
 	);
-	glm::vec3 up = glm::cross( right, direction );
+//	glm::vec3 up = glm::cross( right, direction );
 	glm::vec3 position = m_camPos;
 	
-	if ( camera_state_position == Camera_State::KEYBOARD_UPDATE_NEEDED){
+	
 		if ( curr_key == Helios_Key::UP){
 			//Up
 			position += direction * deltaTime * speed;
@@ -67,17 +74,16 @@ void Camera::update() {
 			//Left
 			position -= right * deltaTime * speed;
 		}
-	}
 	
 	m_camPos = position;
 	m_camTarget =  position+direction;
 	camera_state_position = Camera_State::STILL;
 	camera_state_orientation = Camera_State::STILL;
+	curr_key = Helios_Key::NONE;
 }
 
 void Camera::update_keyboard(Helios_Key key) {
 	curr_key = key;
-	camera_state_position= Camera_State::KEYBOARD_UPDATE_NEEDED;
 }
 
 glm::vec3 Camera::get_camera_position() const{
@@ -86,4 +92,9 @@ glm::vec3 Camera::get_camera_position() const{
 
 glm::vec3 Camera::get_camera_target() const{
 	return m_camTarget;
+}
+
+Camera::Camera(glm::vec3 position, glm::vec3 target) {
+	m_camPos = position;
+	m_camTarget = target;
 }
