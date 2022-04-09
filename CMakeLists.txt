@@ -38,6 +38,8 @@ set(
         src/Quad.cpp
         src/Frame.cpp
         src/Camera.cpp
+        src/Object_Loader.cpp
+
         #glad
         ext/glad/src/glad.c
 

@@ -60,8 +60,7 @@ __global__ void ray_trace(cudaSurfaceObject_t surface, const glm::vec3 camera_po
 
 	
 	float xw = 0.0011111111111111111f*x - 0.9994444444444445;
-	//450 is Height/2
-	float yw = (y - 450.0f)/HEIGHT + 0.0005555555555555556;
+	float yw = (y - HEIGHT/2.0f)/HEIGHT + 0.0005555555555555556;
 	
 	dir += u * xw;
 	dir += v * yw;

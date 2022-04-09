@@ -8,6 +8,7 @@
 #include <string>
 #include <GLFW/glfw3.h>
 #include "imgui.h"
+#include "Object_Loader.h"
 
 class Application {
 	const int m_width;
@@ -22,7 +23,7 @@ private:
 public:
 	Application(int w, int h);
 	Application();
-	void run();
+	void run( Object_Loader& loader );
 	~Application();
 };
 
