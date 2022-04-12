@@ -18,12 +18,18 @@ class Application {
 	const ImVec4 m_clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 	GLFWwindow* m_window;
 	
+	//Model
+	std::vector<Mesh_Positions> m_positions;
+	std::vector<Vertex> m_vertices;
+	std::vector<unsigned int> m_indices;
+	
 private:
 	void init_window();
 public:
 	Application(int w, int h);
 	Application();
-	void run( Object_Loader& loader );
+	void load_model(Object_Loader& loader);
+	void run( );
 	~Application();
 };
 

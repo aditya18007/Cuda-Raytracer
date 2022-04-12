@@ -11,22 +11,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 #CUDA
 find_package(CUDAToolkit REQUIRED)
 
-#Thrust
-
-set(CUB_ENABLE_TESTING OFF)
-set(CUB_ENABLE_EXAMPLES OFF)
-
-add_subdirectory(ext/cub)
-
-set(THRUST_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
-set(THRUST_ENABLE_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(THRUST_ENABLE_BENCHMARKS OFF CACHE BOOL "" FORCE)
-
-add_subdirectory(ext/thrust)
-
-find_package(Thrust REQUIRED CONFIG)
-thrust_create_target(Thrust DEVICE HOST)
-
 #OpenGL
 find_package(OpenGL REQUIRED)
 
@@ -55,7 +39,7 @@ set(
         src/Frame.cpp
         src/Camera.cpp
         src/Object_Loader.cpp
-
+        src/Cuda_utils.cu
         #glad
         ext/glad/src/glad.c
 
@@ -90,4 +74,4 @@ target_compile_options(${PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
         --keep # Keep PTX code
         >)
 
-target_link_libraries(${TARGET} glfw OpenGL::GL glm assimp Thrust)
+target_link_libraries(${TARGET} glfw OpenGL::GL glm assimp )

@@ -17,10 +17,18 @@ struct Vertex {
 	glm::vec3 Normal;
 };
 
+struct Mesh_Positions{
+	int start_vertices;
+	int num_vertices;
+	int start_indices;
+	int num_indices;
+};
+
+
 class Mesh {
 public:
 	// mesh Data
-	std::vector<Vertex>       vertices;
+	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
 public:
 	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices)
@@ -28,22 +36,26 @@ public:
 		this->vertices = vertices;
 		this->indices = indices;
 	}
-	std::vector<Vertex> get_vertices() const{
+	const std::vector<Vertex>& get_vertices() const{
 		return this->vertices;
 	}
-	std::vector<unsigned int> get_indices() const{
+	
+	const std::vector<unsigned int>& get_indices() const{
 		return this->indices;
 	}
 };
 
 class Object_Loader {
-	std::vector<Mesh>    meshes;
+	std::vector<Mesh> meshes;
 	const aiScene* m_scene;
 public:
 	Object_Loader(const std::string& object_name );
 	const aiScene* get_scene();
 	void processNode(aiNode *node, const aiScene *scene);
 	Mesh processMesh(aiMesh *mesh, const aiScene *scene);
+	 std::vector<Mesh>& get_meshes() {
+		return meshes;
+	}
 };
 
 

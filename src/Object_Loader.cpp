@@ -14,13 +14,12 @@ Object_Loader::Object_Loader(const std::string& object_name) {
 	auto obj_location = directory + object_name;
 	
 	Assimp::Importer importer;
-	m_scene = importer.ReadFile( obj_location, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+	m_scene = importer.ReadFile( obj_location, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices);
 	if (m_scene == nullptr){
 		std::cout << "Failed to Load Object\n" << std::endl;
 		exit(-1);
 	}
 	processNode(m_scene->mRootNode, m_scene);
-	std::cout << meshes.size() << std::endl;
 }
 
 const aiScene *Object_Loader::get_scene() {

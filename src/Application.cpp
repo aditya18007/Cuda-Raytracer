@@ -2,7 +2,6 @@
 // Created by aditya on 07/04/22.
 //
 
-#include <iostream>
 #include "glad/glad.h"
 #include "Application.h"
 
@@ -16,7 +15,8 @@
 #include "Update_frame.h"
 #include "Frame.h"
 #include "Camera.h"
-
+#include "Cuda_utils.h"
+#include <iostream>
 static void glfw_error_callback(int error, const char* description)
 {
 	fprintf(stderr, "Glfw Error %d: %s\n", error, description);
@@ -67,7 +67,39 @@ Application::~Application() {
 	glfwTerminate();
 }
 
-void Application::run( Object_Loader& loader ) {
+void Application::load_model(Object_Loader &loader) {
+	const auto& meshes = loader.get_meshes();
+	int start_vertex = 0;
+	int start_face = 0;
+	int start = 0;
+	
+	int min_pos = -1;
+	int max_count = INT_MAX;
+	for(auto& mesh : meshes){
+		auto& vertices = mesh.vertices;
+		auto& indices = mesh.indices;
+		struct Mesh_Positions positions{};
+		
+		positions.start_vertices = start_vertex;
+		positions.num_vertices = vertices.size();
+		start_vertex += positions.num_vertices;
+		
+		positions.start_indices = start_face;
+		positions.num_indices = indices.size();
+		start_face += positions.num_indices;
+		
+		m_positions.push_back(positions);
+		m_vertices.insert(m_vertices.end(), vertices.begin(), vertices.end());
+		m_indices.insert(m_indices.end(), indices.begin(), indices.end());
+	}
+	
+	
+	std::cout << "Number of Meshes = " << m_positions.size() << std::endl;
+	std::cout << "Number of Indices = " << m_indices.size() << std::endl;
+	std::cout << "Number of Vertices = " << m_vertices.size() << std::endl;
+}
+
+void Application::run() {
 	
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	io.WantCaptureKeyboard = true;
@@ -85,9 +117,13 @@ void Application::run( Object_Loader& loader ) {
 	float angle[3]{0};
 	float speed{3.0};
 	float last_time = glfwGetTime();
+	
+	GPU_array<struct Mesh_Positions> d_positions(m_positions.data(), m_positions.size());
+	GPU_array<struct Vertex> d_vertices(m_vertices.data(), m_vertices.size());
+	GPU_array<unsigned int> d_indices(m_indices.data(), m_indices.size());
+	
 	while (!glfwWindowShouldClose(m_window))
 	{
-		
 		
 		glfwPollEvents();
 		
@@ -147,8 +183,14 @@ void Application::run( Object_Loader& loader ) {
 					1. x-axis along width
 					2. y-axis along height
 			*/
-			camera.update(speed, delta_time, angle[1], angle[0], angle[2]);
-			compute_frame(frame, camera);
+			camera.update(speed, delta_time, angle[0], angle[1], angle[2]);
+			ImGui::Text("Camera Position = (%f,%f,%f)", camera.get_camera_position().x,camera.get_camera_position().y,camera.get_camera_position().z );
+			compute_frame(frame, camera,
+						  d_positions.arr(), d_positions.get_size(),
+						  d_vertices.arr(),d_vertices.get_size(),
+						  d_indices.arr(), d_indices.get_size()
+						  );
+			
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			ImGui::End();
 		}
