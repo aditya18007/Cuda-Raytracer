@@ -117,6 +117,41 @@ void Application::run() {
 	float angle[3]{0};
 	float speed{3.0};
 	float last_time = glfwGetTime();
+	glm::vec3 target(0,0,0);
+	
+	float min_x{std::numeric_limits<float>::max()};
+	float min_y{std::numeric_limits<float>::max()};
+	float min_z{std::numeric_limits<float>::max()};
+	
+	float max_x{std::numeric_limits<float>::min()};
+	float max_y{std::numeric_limits<float>::min()};
+	float max_z{std::numeric_limits<float>::min()};
+	
+	for(auto& vertex: m_vertices){
+		target += vertex.Position;
+		max_x = std::max(max_x, vertex.Position.x);
+		max_y = std::max(max_y, vertex.Position.y);
+		max_z = std::max(max_z, vertex.Position.z);
+		
+		min_x = std::min(min_x, vertex.Position.x);
+		min_y = std::min(min_y, vertex.Position.y);
+		min_z = std::min(min_z, vertex.Position.z);
+	}
+	
+	auto deno_x = max_x - min_x;
+	auto deno_y = max_y - min_y;
+	auto deno_z = max_z - min_z;
+	
+	for(auto& vertex: m_vertices){
+		vertex.Position.x = (vertex.Position.x - min_x) / deno_x;
+		vertex.Position.y = (vertex.Position.y - min_y) / deno_y;
+		vertex.Position.z = (vertex.Position.z - min_z) / deno_z;
+	}
+	
+	target /= m_vertices.size();
+	target.x = (target.x - min_x) / deno_x;
+	target.y = (target.y - min_y) / deno_y;
+	target.z = (target.z - min_z) / deno_z;
 	
 	GPU_array<struct Mesh_Positions> d_positions(m_positions.data(), m_positions.size());
 	GPU_array<struct Vertex> d_vertices(m_vertices.data(), m_vertices.size());
@@ -185,6 +220,7 @@ void Application::run() {
 			*/
 			camera.update(speed, delta_time, angle[0], angle[1], angle[2]);
 			ImGui::Text("Camera Position = (%f,%f,%f)", camera.get_camera_position().x,camera.get_camera_position().y,camera.get_camera_position().z );
+			ImGui::Text("Camera Target = (%f,%f,%f)", camera.get_camera_target().x,camera.get_camera_target().y,camera.get_camera_target().z );
 			compute_frame(frame, camera,
 						  d_positions.arr(), d_positions.get_size(),
 						  d_vertices.arr(),d_vertices.get_size(),

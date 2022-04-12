@@ -11,6 +11,12 @@ Helios is a CUDA based ray-tracer.
 
 ### Resources
 
+#### Models
+
+* https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/ray-triangle-intersection-geometric-solution
+
+#### Code
+
 * General:
   * My own implementation of Ray Tracer in OpenGL shaders.
   * https://github.com/CSE-333-Computer-Graphics-2020
@@ -26,3 +32,6 @@ Helios is a CUDA based ray-tracer.
 * Mesh Loading
   * https://assimp-docs.readthedocs.io/en/v5.1.0/usage/use_the_lib.html
   * https://github.com/JoeyDeVries/LearnOpenGL (Model, Mesh, Vertex class from here)
+* Ray-Triangle intersection
+  * https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/ray-triangle-intersection-geometric-solution
+

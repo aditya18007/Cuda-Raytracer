@@ -8,7 +8,7 @@
 #include "glm/gtx/rotate_vector.hpp"
 
 Camera::Camera()
-: lookAt(0, 0, 0), lookFrom(0, 0, 5),
+: lookAt(0, 0, 0), lookFrom(3, 3, 3),
 current_key(Helios_Key::NONE),
 angle_x(0), angle_y(0), angle_z(0)
 {}
@@ -84,7 +84,7 @@ void Camera::update( float movement_speed, float deltaTime ,  float new_x, float
 
 
 void Camera::reset_location() {
-	lookFrom = glm::vec3(0,0,5);
+	lookFrom = glm::vec3(3,3,3);
 	lookAt = glm::vec3(0,0,0);
 	angle_x = 0;
 	angle_y = 0;
@@ -102,3 +102,12 @@ glm::vec3 Camera::get_v() const {
 glm::vec3 Camera::get_dir() const {
 	return dir;
 }
+
+void Camera::set_position(const glm::vec3 &new_pos) {
+	this->lookFrom = new_pos;
+}
+
+void Camera::set_target(const glm::vec3 &new_target) {
+	this->lookAt = new_target;
+}
+
