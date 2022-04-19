@@ -79,7 +79,7 @@ void Camera::update( float movement_speed, float deltaTime ,  float new_x, float
 	//Reduced burden from there to here.
 	u = -right;
 	v = glm::normalize(cross(direction, u));
-	dir = -direction * 1.2071067811865475f;
+	dir = direction * 1.2071067811865475f;
 	current_key = Helios_Key::NONE;
 }
 
