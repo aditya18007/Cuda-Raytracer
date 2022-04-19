@@ -39,7 +39,8 @@ __device__ bool intersect_triangle(
 		Ray& r, Triangle tri,
 		float &t)
 {
-	
+	//Directly using code from https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/ray-triangle-intersection-geometric-solution
+	// Will change this later.
 	const glm::vec3 v0 = tri.a;
 	const glm::vec3 v1 = tri.b;
 	const glm::vec3 v2 = tri.c;

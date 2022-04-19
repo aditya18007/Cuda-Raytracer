@@ -93,36 +93,8 @@ void Application::load_model(Object_Loader &loader) {
 		m_indices.insert(m_indices.end(), indices.begin(), indices.end());
 	}
 	
-	float min_x{std::numeric_limits<float>::max()};
-	float min_y{std::numeric_limits<float>::max()};
-	float min_z{std::numeric_limits<float>::max()};
-	
-	float max_x{std::numeric_limits<float>::min()};
-	float max_y{std::numeric_limits<float>::min()};
-	float max_z{std::numeric_limits<float>::min()};
-	
-	for(auto& vertex: m_vertices){
-		max_x = std::max(max_x, vertex.Position.x);
-		max_y = std::max(max_y, vertex.Position.y);
-		max_z = std::max(max_z, vertex.Position.z);
-		
-		min_x = std::min(min_x, vertex.Position.x);
-		min_y = std::min(min_y, vertex.Position.y);
-		min_z = std::min(min_z, vertex.Position.z);
-	}
-	
-	auto deno_x = max_x - min_x;
-	auto deno_y = max_y - min_y;
-	auto deno_z = max_z - min_z;
-	
-	for(auto& vertex: m_vertices){
-		vertex.Position.x = (vertex.Position.x - min_x) / deno_x;
-		vertex.Position.y = (vertex.Position.y - min_y) / deno_y;
-		vertex.Position.z = (vertex.Position.z - min_z) / deno_z;
-	}
-	
 	std::cout << "Number of Meshes = " << m_positions.size() << std::endl;
-	std::cout << "Number of Indices = " << m_indices.size() << std::endl;
+	std::cout << "Number of Faces = " << m_indices.size()/3 << std::endl;
 	std::cout << "Number of Vertices = " << m_vertices.size() << std::endl;
 }
 
@@ -174,7 +146,7 @@ void Application::run() {
 				camera.reset_location();
 			}
 			
-			ImGui::SliderFloat("Camera Speed", &speed, 0.0f, 10.0f);
+			ImGui::DragFloat("Camera Speed", &speed, 0.1f, 0.0f, 1000.0f);
 			
 			ImGui::Text("Use w, a, s, d to move camera.");
 			if(ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_W))){
