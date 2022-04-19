@@ -202,16 +202,7 @@ void Application::run() {
 			float curr_time = glfwGetTime();
 			float delta_time = curr_time - last_time;
 			last_time = curr_time;
-			
-			/*
-			Given that negative z-axis is pointing towards screen,
-			 * x-axis is pointing up (along height of screen)
-			 * y-axis is pointing right (along width of screen)
-			 * I am passing x and y in place of each other to help users
-			   maintain general notation of axes:
-					1. x-axis along width
-					2. y-axis along height
-			*/
+		
 			camera.update(speed, delta_time, angle[0], angle[1], angle[2]);
 			ImGui::Text("Camera Position = (%f,%f,%f)", camera.get_camera_position().x,camera.get_camera_position().y,camera.get_camera_position().z );
 			ImGui::Text("Camera Target = (%f,%f,%f)", camera.get_camera_target().x,camera.get_camera_target().y,camera.get_camera_target().z );
