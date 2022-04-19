@@ -23,6 +23,9 @@ class Camera {
 	glm::vec3 lookFrom;
 	glm::vec3 lookAt;
 	
+	glm::vec3 original_lookFrom;
+	glm::vec3 original_lookAt;
+	
 	Helios_Key current_key;
 	
 	float angle_x, angle_y, angle_z;
