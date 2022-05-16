@@ -16,6 +16,8 @@
 #include "Frame.h"
 #include "Camera.h"
 #include "Cuda_utils.h"
+#include "BVH.h"
+
 #include <iostream>
 static void glfw_error_callback(int error, const char* description)
 {
@@ -96,6 +98,27 @@ void Application::load_model(Object_Loader &loader) {
 	std::cout << "Number of Meshes = " << m_positions.size() << std::endl;
 	std::cout << "Number of Faces = " << m_indices.size()/3 << std::endl;
 	std::cout << "Number of Vertices = " << m_vertices.size() << std::endl;
+
+
+    for(int i = 0; i < m_positions.size(); i++){
+        int start_index = m_positions[i].start_indices;
+        int num_indices = m_positions[i].num_indices;
+
+        int start_vertex = m_positions[i].start_vertices;
+        int num_vertices = m_positions[i].num_vertices;
+        for(int idx = start_index; idx < start_index + num_indices; idx += 3){
+            auto a_pos =  start_vertex + m_indices[idx];
+            auto b_pos = start_vertex + m_indices[idx+1];
+            auto c_pos = start_vertex + m_indices[idx+2];
+            Triangle triangle(m_vertices[a_pos].Position, m_vertices[b_pos].Position, m_vertices[c_pos].Position);
+            m_triangles.push_back(triangle);
+        }
+    }
+
+    BVH_tree tree(m_triangles);
+    auto traversal_tree = tree.create_tree();
+    auto triangle_indices = tree.get_indices();
+    std::cout << "Number of nodes in BVH tree = " << traversal_tree.size() << '\n';
 }
 
 void Application::run() {
@@ -118,26 +141,8 @@ void Application::run() {
 	float last_time = glfwGetTime();
 	camera.set_target(m_vertices[0].Position);
 	camera.set_position(m_vertices[1].Position);
-	
-	GPU_array<struct Mesh_Positions> d_positions(m_positions.data(), m_positions.size());
-	GPU_array<struct Vertex> d_vertices(m_vertices.data(), m_vertices.size());
-	GPU_array<unsigned int> d_indices(m_indices.data(), m_indices.size());
 
-    std::vector<Triangle> m_triangles;
-    for(int i = 0; i < m_positions.size(); i++){
-        int start_index = m_positions[i].start_indices;
-        int num_indices = m_positions[i].num_indices;
 
-        int start_vertex = m_positions[i].start_vertices;
-        int num_vertices = m_positions[i].num_vertices;
-        for(int idx = start_index; idx < start_index + num_indices; idx += 3){
-            auto a_pos =  start_vertex + m_indices[idx];
-            auto b_pos = start_vertex + m_indices[idx+1];
-            auto c_pos = start_vertex + m_indices[idx+2];
-            Triangle triangle(m_vertices[a_pos].Position, m_vertices[b_pos].Position, m_vertices[c_pos].Position);
-            m_triangles.push_back(triangle);
-        }
-    }
     GPU_array<Triangle> d_triangles(m_triangles.data(), m_triangles.size());
 	while (!glfwWindowShouldClose(m_window))
 	{

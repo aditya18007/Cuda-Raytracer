@@ -40,6 +40,8 @@ set(
         src/Camera.cpp
         src/Object_Loader.cpp
         src/Cuda_utils.cu
+        src/BVH.cpp
+
         #glad
         ext/glad/src/glad.c
 
@@ -51,7 +53,7 @@ set(
         ext/imgui/imgui_tables.cpp
         ext/imgui/imgui_widgets.cpp
         ext/imgui/imgui_impl_opengl3.cpp
-)
+        src/BVH.cpp src/BVH.h)
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${CUDAToolkit_INCLUDE_DIRS}
