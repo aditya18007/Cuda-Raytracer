@@ -83,7 +83,7 @@ void BVH_tree::recurse( int idx) {
     assert(m_tree.size() == nodes_used);
     auto& node = m_tree[idx];
 
-    if (node.prim_count < 2) return;
+    if (node.prim_count < 4) return;
 
     auto x_stretch = node.max_x - node.min_x;
     auto y_stretch = node.max_y - node.min_y;
@@ -127,6 +127,7 @@ void BVH_tree::recurse( int idx) {
     assert(m_tree.size() == nodes_used);
 
     node.left_node = leftChildIdx;
+//    std::cout << m_tree[idx].left_node << std::endl;
     m_tree[leftChildIdx].start_idx = node.start_idx;
     m_tree[leftChildIdx].prim_count = leftCount;
 

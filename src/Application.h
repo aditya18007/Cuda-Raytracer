@@ -26,6 +26,9 @@ class Application {
 	std::vector<Vertex> m_vertices;
 	std::vector<unsigned int> m_indices;
     std::vector<Triangle> m_triangles;
+    std::vector<int> m_triangle_indices;
+    std::vector<BVH_node> m_traversal_tree;
+
 private:
 	void init_window();
 public:

@@ -40,7 +40,7 @@ public:
 
     int left_node{-1};
 
-    int start_idx{-1};
+    int start_idx{0};
     int prim_count{0};
 
     __device__ __host__ bool is_leaf(){

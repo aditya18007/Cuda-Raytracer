@@ -116,9 +116,10 @@ void Application::load_model(Object_Loader &loader) {
     }
 
     BVH_tree tree(m_triangles);
-    auto traversal_tree = tree.create_tree();
-    auto triangle_indices = tree.get_indices();
-    std::cout << "Number of nodes in BVH tree = " << traversal_tree.size() << '\n';
+    m_traversal_tree = tree.create_tree();
+    m_triangle_indices = tree.get_indices();
+
+    std::cout << "Number of nodes in BVH tree = " << m_traversal_tree.size() << '\n';
 }
 
 void Application::run() {
@@ -144,6 +145,9 @@ void Application::run() {
 
 
     GPU_array<Triangle> d_triangles(m_triangles.data(), m_triangles.size());
+    GPU_array<int> d_triangle_indices(m_triangle_indices.data(), m_triangle_indices.size());
+    GPU_array<BVH_node> d_traversal_tree(m_traversal_tree.data(), m_traversal_tree.size());
+
 	while (!glfwWindowShouldClose(m_window))
 	{
 		
@@ -200,9 +204,12 @@ void Application::run() {
 			ImGui::Text("Camera Position = (%f,%f,%f)", camera.get_camera_position().x,camera.get_camera_position().y,camera.get_camera_position().z );
 			ImGui::Text("Camera Target = (%f,%f,%f)", camera.get_camera_target().x,camera.get_camera_target().y,camera.get_camera_target().z );
 
+//            compute_frame(frame, camera,
+//						  d_triangles.arr(), d_triangles.get_size()
+//						  );
             compute_frame(frame, camera,
-						  d_triangles.arr(), d_triangles.get_size()
-						  );
+                          d_triangles.arr(), d_triangle_indices.arr(), d_triangles.get_size(),
+                          d_traversal_tree.arr(), d_traversal_tree.get_size());
 			
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			ImGui::End();
