@@ -39,73 +39,23 @@ __device__ bool intersect_triangle(
 		Ray& r, Triangle tri,
 		float &t)
 {
-	//Directly using code from https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/ray-triangle-intersection-geometric-solution
-	// Will change this later.
-	const glm::vec3 v0 = tri.a;
-	const glm::vec3 v1 = tri.b;
-	const glm::vec3 v2 = tri.c;
-	
-	// compute plane's normal
-	auto v0v1 = v1 - v0;
-	auto v0v2 = v2 - v0;
-	// no need to normalize
-	auto N = glm::cross(v0v1, v0v2);
-	float area2 = glm::length(N);
-	
-	// Step 1: finding P
-	
-	// check if ray and plane are parallel ?
-	float NdotRayDirection = glm::dot(N, r.direction);
-	float kEpsilon = 1e-8;
-	if (fabs(NdotRayDirection) < kEpsilon) // almost 0
-		return false; // they are parallel so they don't intersect !
-	
-	// compute d parameter using equation 2
-	float d = -glm::dot(N, v0);
-	
-	// compute t (equation 3)
-	t = -(glm::dot(N, r.origin) + d) / NdotRayDirection;
-	
-	// check if the triangle is in behind the ray
-	if (t < 0) return false; // the triangle is behind
-	
-	// compute the intersection point using equation 1
-	glm::vec3 P = r.origin + t * r.direction;
-	
-	// Step 2: inside-outside test
-	glm::vec3 C; // vector perpendicular to triangle's plane
-	
-	// edge 0
-	auto edge0 = v1 - v0;
-	auto vp0 = P - v0;
-	C = glm::cross(edge0, vp0);
-	if (glm::dot(N, C) < 0) return false; // P is on the right side
-	
-	// edge 1
-	auto edge1 = v2 - v1;
-	auto vp1 = P - v1;
-	C = glm::cross(edge1,vp1);
-	if ( glm::dot(N, C) < 0)  return false; // P is on the right side
-	
-	// edge 2
-	auto edge2 = v0 - v2;
-	auto vp2 = P - v2;
-	C = glm::cross(edge2, vp2);
-	if (glm::dot(N, C) < 0) return false; // P is on the right side;
-	
-	return true; // this ray hits the triangle
+    const glm::vec3 edge1 = tri.b - tri.a;
+    const glm::vec3 edge2 = tri.c - tri.a;
+    const glm::vec3 h = glm::cross( r.direction, edge2 );
+    const float a = glm::dot( edge1, h );
+    if (a > -0.0001f && a < 0.0001f) return false; // ray parallel to triangle
+    const float f = 1 / a;
+    const glm::vec3 s = r.origin - tri.a;
+    const float u = f * glm::dot( s, h );
+    if (u < 0 || u > 1) return false;
+    const glm::vec3 q = cross( s, edge1 );
+    const float v = f * dot( r.direction, q );
+    if (v < 0 || u + v > 1) return false;
+    float t_poss = f * dot( edge2, q );
+    if (t > 0.0001f) t = min( t_poss, t );
+    return true;
 }
 
-__device__ bool intersect_sphere(Ray& r, Sphere& s) {
-	float a = glm::dot(r.direction,r.direction);
-	float b = glm::dot(r.direction, (r.origin-s.origin)*2.0f );
-	float c = glm::dot(s.origin, s.origin) + glm::dot(r.origin,r.origin) +-2.0*glm::dot(r.origin,s.origin) - (s.radius*s.radius);
-	
-	if (b*b < 4*a*c){
-		return false;
-	}
-	return true;
-}
 __global__ void ray_trace(cudaSurfaceObject_t surface, const glm::vec3 camera_pos, glm::vec3 u, glm::vec3 v, glm::vec3 dir, Mesh_Positions* d_positions, int n_positions, Vertex* d_vertices, int n_vertices, unsigned int * d_indices, int n_indices)
 {
 	
