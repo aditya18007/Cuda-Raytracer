@@ -122,7 +122,23 @@ void Application::run() {
 	GPU_array<struct Mesh_Positions> d_positions(m_positions.data(), m_positions.size());
 	GPU_array<struct Vertex> d_vertices(m_vertices.data(), m_vertices.size());
 	GPU_array<unsigned int> d_indices(m_indices.data(), m_indices.size());
-	
+
+    std::vector<Triangle> m_triangles;
+    for(int i = 0; i < m_positions.size(); i++){
+        int start_index = m_positions[i].start_indices;
+        int num_indices = m_positions[i].num_indices;
+
+        int start_vertex = m_positions[i].start_vertices;
+        int num_vertices = m_positions[i].num_vertices;
+        for(int idx = start_index; idx < start_index + num_indices; idx += 3){
+            auto a_pos =  start_vertex + m_indices[idx];
+            auto b_pos = start_vertex + m_indices[idx+1];
+            auto c_pos = start_vertex + m_indices[idx+2];
+            Triangle triangle(m_vertices[a_pos].Position, m_vertices[b_pos].Position, m_vertices[c_pos].Position);
+            m_triangles.push_back(triangle);
+        }
+    }
+    GPU_array<Triangle> d_triangles(m_triangles.data(), m_triangles.size());
 	while (!glfwWindowShouldClose(m_window))
 	{
 		
@@ -178,10 +194,9 @@ void Application::run() {
 			camera.update(speed, delta_time, angle[0], angle[1], angle[2]);
 			ImGui::Text("Camera Position = (%f,%f,%f)", camera.get_camera_position().x,camera.get_camera_position().y,camera.get_camera_position().z );
 			ImGui::Text("Camera Target = (%f,%f,%f)", camera.get_camera_target().x,camera.get_camera_target().y,camera.get_camera_target().z );
-			compute_frame(frame, camera,
-						  d_positions.arr(), d_positions.get_size(),
-						  d_vertices.arr(),d_vertices.get_size(),
-						  d_indices.arr(), d_indices.get_size()
+
+            compute_frame(frame, camera,
+						  d_triangles.arr(), d_triangles.get_size()
 						  );
 			
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);

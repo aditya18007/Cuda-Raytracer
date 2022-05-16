@@ -7,8 +7,24 @@
 
 #include <string>
 #include <GLFW/glfw3.h>
+#include <crt/host_defines.h>
 #include "imgui.h"
 #include "Object_Loader.h"
+
+class Triangle{
+
+public:
+    glm::vec3 a;
+    glm::vec3 b;
+    glm::vec3 c;
+    glm::vec3 centroid;
+    __device__ __host__ Triangle(glm::vec3& v0, glm::vec3& v1, glm::vec3& v2 ){
+        a = v0;
+        b = v1;
+        c = v2;
+        centroid = (a+b+c)/(3.0f);
+    }
+};
 
 class Application {
 	const int m_width;

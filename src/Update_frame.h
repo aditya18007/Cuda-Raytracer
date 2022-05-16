@@ -7,5 +7,5 @@
 #include "Frame.h"
 #include "Camera.h"
 
-extern void compute_frame(Frame& frame, const Camera& camera, Mesh_Positions* d_positions, int n_positions, Vertex* d_vertices, int n_vertices, unsigned int * d_indices, int n_indices);
+extern void compute_frame(Frame& frame, const Camera& camera, Triangle* d_triangles, int n_triangles);
 #endif //HELIOS_TEMP_H
