@@ -120,9 +120,7 @@ __device__ void IntersectBVH( Ray& ray, Triangle* d_triangles, int* d_triangle_i
             intersect_triangle(ray, tri);
         }
     } else {
-        if (node.left_node  >= 0)
-            IntersectBVH( ray, d_triangles, d_triangle_indices, tree, node.left_node );
-        if (node.left_node+1 >=0)
+        IntersectBVH( ray, d_triangles, d_triangle_indices, tree, node.left_node );
         IntersectBVH( ray, d_triangles, d_triangle_indices, tree, node.left_node+1 );
     }
 }
