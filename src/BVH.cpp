@@ -83,25 +83,29 @@ void BVH_tree::recurse( int idx) {
     assert(m_tree.size() == nodes_used);
     auto& node = m_tree[idx];
 
-    if (node.prim_count < 4) return;
-
-    auto x_stretch = node.max_x - node.min_x;
-    auto y_stretch = node.max_y - node.min_y;
-    auto z_stretch = node.max_z - node.min_z;
-
-    int axis = 0;
-    float split_pos = node.min_x + x_stretch/2.0f;
-
-    if (y_stretch > x_stretch){
-        axis = 1;
-        split_pos = node.min_y + y_stretch/2.0f;
+    float a = node.max_x-node.min_x;
+    float b = node.max_y-node.min_y;
+    float c = node.max_z-node.min_z;
+    float parent_area = a*b + b*c + c*a;
+    float parent_cost = parent_area*node.prim_count;
+    int bestAxis = -1;
+    float bestPos = 0, bestCost = 1e30f;
+    for( int axis = 0; axis < 3; axis++ ) {
+        for( uint i = 0; i < node.prim_count; i++ ) {
+            auto& triangle = m_triangles[ m_triangle_indices[node.start_idx + i]];
+            float candidatePos = triangle.centroid[axis];
+            float cost = score( node, axis, candidatePos );
+            if (cost < bestCost){
+                bestPos = candidatePos, bestAxis = axis, bestCost = cost;
+            }
+        }
     }
+    int axis = bestAxis;
+    float split_pos = bestPos;
 
-    if (z_stretch > x_stretch && z_stretch > y_stretch){
-        axis = 2;
-        split_pos = node.min_z + z_stretch/2.0f;
+    if (bestCost >= parent_cost){
+        return;
     }
-
     int i = node.start_idx;
     int j = i + node.prim_count - 1;
     while (i <= j)
@@ -127,7 +131,6 @@ void BVH_tree::recurse( int idx) {
     assert(m_tree.size() == nodes_used);
 
     node.left_node = leftChildIdx;
-//    std::cout << m_tree[idx].left_node << std::endl;
     m_tree[leftChildIdx].start_idx = node.start_idx;
     m_tree[leftChildIdx].prim_count = leftCount;
 
@@ -139,4 +142,26 @@ void BVH_tree::recurse( int idx) {
     this->update_bbox( rightChildIdx );
     recurse( leftChildIdx );
     recurse( rightChildIdx );
+}
+
+float BVH_tree::score(BVH_node &node, int axis, float pos) {
+    Bounding_Box left, right;
+    int left_count = 0, right_count = 0;
+    for(int i  = 0; i < node.prim_count; i++){
+        auto& triangle = m_triangles[ m_triangle_indices[node.start_idx + i]];
+        if (triangle.centroid[axis] < pos){
+            left_count++;
+            left.update(triangle.a);
+            left.update(triangle.b);
+            left.update(triangle.c);
+            continue;
+        }
+        right_count++;
+        right.update(triangle.a);
+        right.update(triangle.b);
+        right.update(triangle.c);
+    }
+    auto cost = left_count*left.area() + right_count*right.area();
+    if (cost < 0) return FLT_MAX;
+    return cost;
 }

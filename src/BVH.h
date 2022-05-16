@@ -10,11 +10,36 @@
 #include <iostream>
 #include <cuda_runtime.h>
 #include "glm/vec3.hpp"
+#include <cmath>
 
-enum class Axis{
-    X,
-    Y,
-    Z
+class Bounding_Box{
+public:
+    float min_x{FLT_MAX}, min_y{FLT_MAX}, min_z{FLT_MAX};
+    float max_x{FLT_MIN}, max_y{FLT_MIN}, max_z{FLT_MIN};
+
+    void update(glm::vec3 point){
+        min_x = std::min(min_x, point.x);
+        min_y = std::min(min_y, point.y);
+        min_z = std::min(min_z, point.z);
+
+        max_x = std::max(max_x, point.x);
+        max_y = std::max(max_y, point.y);
+        max_z = std::max(max_z, point.z);
+    }
+
+    float area(){
+        float a = max_x-min_x;
+        float b = max_y-min_y;
+        float c = max_z-min_z;
+        return a*b + b*c + c*a;
+    }
+
+    glm::vec3 normalize01(glm::vec3 point){
+        point.x = (point.x - min_x) / (max_x - min_x);
+        point.y = (point.y - min_y) / (max_y - min_y);
+        point.z = (point.z - min_z) / (max_z - min_z);
+        return point;
+    }
 };
 
 class Triangle{
@@ -59,6 +84,7 @@ class BVH_tree{
     void create_root();
     void update_bbox(int idx);
     void recurse(int idx);
+    float score(BVH_node& node, int axis, float pos);
 public:
     BVH_tree(const std::vector<Triangle>& triangles);
     std::vector<BVH_node> create_tree();
