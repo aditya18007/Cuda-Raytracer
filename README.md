@@ -3,6 +3,11 @@
 
 Helios is a CUDA based ray-tracer.
 
+### You may need to install following
+* libxrandr : sudo apt-get install -y libxrandr-dev
+* libxinerama : sudo apt-get install -y libxinerama-dev
+* libxcursor : sudo apt-get install -y libxcursor-dev
+* libxi: sudo apt-get install -y libxi-dev
 ### Visualising Blocks 
 
 * Following image shows the blocks that compute color for each region of screen.
