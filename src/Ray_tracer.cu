@@ -74,6 +74,31 @@ __device__ void IntersectBVH( Ray& ray, Triangle* d_triangles, int* d_triangle_i
     }
 }
 
+__device__ void IntersectBVH2( Ray& ray, Triangle* d_triangles, int* d_triangle_indices, BVH_node* tree )
+{
+    int stack[1024];
+    int stack_ptr = 0;
+    stack[stack_ptr] = 0;
+    while(stack_ptr >= 0){
+        int node_idx = stack[stack_ptr];
+        BVH_node& node = tree[node_idx];
+        if ( !intersect_bbox( ray, node.min_x, node.min_y, node.min_z, node.max_x, node.max_y, node.max_z )){
+            stack_ptr--;
+            continue;
+        }
+        if (node.is_leaf()){
+            for (int i = 0; i < node.prim_count; i++ ){
+                auto& tri = d_triangles[ d_triangle_indices[node.start_idx + i] ];
+                intersect_triangle(ray, tri);
+            }
+            stack_ptr--;
+            continue;
+        }
+        stack[++stack_ptr] = node.left_node;
+        stack[++stack_ptr] = node.left_node + 1;
+    }
+}
+
 __global__ void ray_trace(cudaSurfaceObject_t surface, const glm::vec3 camera_pos, glm::vec3 u, glm::vec3 v, glm::vec3 dir, Triangle* d_triangles, int* d_triangle_indices, int n_triangles, BVH_node* d_traversal_tree, int d_traversal_tree_size)
 {
 
@@ -105,7 +130,8 @@ __global__ void ray_trace(cudaSurfaceObject_t surface, const glm::vec3 camera_po
     Material m{};
     m.color =  glm::vec3(0.1, 0.7, 0.0);
 
-    IntersectBVH(r, d_triangles, d_triangle_indices, d_traversal_tree, 0);
+//    IntersectBVH(r, d_triangles, d_triangle_indices, d_traversal_tree, 0);
+    IntersectBVH2(r, d_triangles, d_triangle_indices, d_traversal_tree);
     if (r.t - FLT_MAX > 1.0f || FLT_MAX - r.t > 1.0f){
         uchar4 pixel = { (uint8_t)(m.color.x*255),
                          (uint8_t)(m.color.y*255),

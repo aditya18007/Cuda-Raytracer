@@ -25,11 +25,9 @@ static void glfw_error_callback(int error, const char* description)
 }
 
 Application::Application() : m_width(1280), m_height(720), m_window(nullptr){
-	this->init_window();
 }
 
 Application::Application(int w, int h) : m_width(w), m_height(h), m_window(nullptr) {
-	this->init_window();
 }
 
 void Application::init_window() {
@@ -120,6 +118,7 @@ void Application::load_model(Object_Loader &loader) {
     m_triangle_indices = tree.get_indices();
 
     std::cout << "Number of nodes in BVH tree = " << m_traversal_tree.size() << '\n';
+    this->init_window();
 }
 
 void Application::run() {
