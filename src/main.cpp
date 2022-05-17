@@ -4,7 +4,7 @@
 
 int main(int, char**)
 {
-	Object_Loader loader("deer.model");
+	Object_Loader loader("cube.model");
 	Application a(WIDTH,HEIGHT );
 	a.load_model(loader);
 	a.run();

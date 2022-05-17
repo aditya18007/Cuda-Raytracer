@@ -16,12 +16,21 @@ struct World{
 };
 
 struct Material{
-	glm::vec3 color;
+    float k_a;
+    glm::vec3 c_a;
+
+    float k_d;
+    glm::vec3 c_r;
+
+    float k_s;
+    glm::vec3 c_p;
+    int n;
 };
 
 struct Ray {
 	glm::vec3 origin;
 	glm::vec3 direction;
+    glm::vec3 normal;
     float t;
 };
 
@@ -41,11 +50,17 @@ __device__ bool intersect_triangle(
     const float v = f * dot( r.direction, q );
     if (v < 0 || u + v > 1) return false;
     float t_poss = f * dot( edge2, q );
-    if (r.t > 0.0001f) r.t = min( t_poss, r.t );
+    if (r.t > 0.0001f) {
+        if (t_poss < r.t){
+            r.t = t_poss;
+            r.normal = tri.normal;
+        }
+    }
+
     return true;
 }
 
-__device__ bool intersect_bbox(Ray& r, float min_x, float min_y, float min_z, float max_x, float max_y, float max_z ){
+__device__ bool intersect_bbox(Ray r, float min_x, float min_y, float min_z, float max_x, float max_y, float max_z ){
 
     float tx1 = (min_x - r.origin.x) / r.direction.x, tx2 = (max_x - r.origin.x) / r.direction.x;
     float tmin = min( tx1, tx2 ), tmax = max( tx1, tx2 );
@@ -59,47 +74,7 @@ __device__ bool intersect_bbox(Ray& r, float min_x, float min_y, float min_z, fl
     return tmax >= tmin && tmin < r.t && tmax > 0;
 }
 
-__device__ void IntersectBVH( Ray& ray, Triangle* d_triangles, int* d_triangle_indices, BVH_node* tree, const uint nodeIdx )
-{
-    BVH_node& node = tree[nodeIdx];
-    if (!intersect_bbox( ray, node.min_x, node.min_y, node.min_z, node.max_x, node.max_y, node.max_z )) return;
-    if (node.is_leaf()) {
-        for (uint i = 0; i < node.prim_count; i++ ){
-            auto& tri = d_triangles[ d_triangle_indices[node.start_idx + i] ];
-            intersect_triangle(ray, tri);
-        }
-    } else {
-        IntersectBVH( ray, d_triangles, d_triangle_indices, tree, node.left_node );
-        IntersectBVH( ray, d_triangles, d_triangle_indices, tree, node.left_node+1 );
-    }
-}
-
-__device__ void IntersectBVH2( Ray& ray, Triangle* d_triangles, int* d_triangle_indices, BVH_node* tree )
-{
-    int stack[1024];
-    int stack_ptr = 0;
-    stack[stack_ptr] = 0;
-    while(stack_ptr >= 0){
-        int node_idx = stack[stack_ptr];
-        BVH_node& node = tree[node_idx];
-        if ( !intersect_bbox( ray, node.min_x, node.min_y, node.min_z, node.max_x, node.max_y, node.max_z )){
-            stack_ptr--;
-            continue;
-        }
-        if (node.is_leaf()){
-            for (int i = 0; i < node.prim_count; i++ ){
-                auto& tri = d_triangles[ d_triangle_indices[node.start_idx + i] ];
-                intersect_triangle(ray, tri);
-            }
-            stack_ptr--;
-            continue;
-        }
-        stack[++stack_ptr] = node.left_node;
-        stack[++stack_ptr] = node.left_node + 1;
-    }
-}
-
-__global__ void ray_trace(cudaSurfaceObject_t surface, const glm::vec3 camera_pos, glm::vec3 u, glm::vec3 v, glm::vec3 dir, Triangle* d_triangles, int* d_triangle_indices, int n_triangles, BVH_node* d_traversal_tree, int d_traversal_tree_size)
+__global__ void ray_trace(cudaSurfaceObject_t surface, const glm::vec3 camera_pos, glm::vec3 u, glm::vec3 v, glm::vec3 dir, const Triangle* d_triangles, const int* d_triangle_indices, int n_triangles, const BVH_node* d_traversal_tree, int d_traversal_tree_size)
 {
 
     //pixel index
@@ -111,7 +86,6 @@ __global__ void ray_trace(cudaSurfaceObject_t surface, const glm::vec3 camera_po
     if(y >= HEIGHT)
         return;
 
-    float SMALLEST_DIST = 1e-4;
 
     World world;
     world.bgcolor = glm::vec3(0.28, 0.28, 0.28);
@@ -128,14 +102,54 @@ __global__ void ray_trace(cudaSurfaceObject_t surface, const glm::vec3 camera_po
     r.direction = normalize(dir);
     r.t = FLT_MAX;
     Material m{};
-    m.color =  glm::vec3(0.1, 0.7, 0.0);
+    m.k_a = 0.3;
+    m.c_a = glm::vec3(1.0f, 0.43f, 0.14f);
 
-//    IntersectBVH(r, d_triangles, d_triangle_indices, d_traversal_tree, 0);
-    IntersectBVH2(r, d_triangles, d_triangle_indices, d_traversal_tree);
+    m.k_d = 0.8;
+    m.c_r = glm::vec3(1.0f, 0.43f, 0.14f);
+
+    m.k_s = 0.3;
+    m.c_p = glm::vec3(1.0f, 1.0f, 1.0f);
+    m.n = 22;
+
+    int stack[1024];
+    int stack_ptr = 0;
+    stack[stack_ptr] = 0;
+    while(stack_ptr >= 0){
+        int node_idx = stack[stack_ptr];
+        const BVH_node& node = d_traversal_tree[node_idx];
+        if ( !intersect_bbox( r, node.min_x, node.min_y, node.min_z, node.max_x, node.max_y, node.max_z )){
+            stack_ptr--;
+            continue;
+        }
+        if (node.is_leaf()){
+            for (int i = 0; i < node.prim_count; i++ ){
+                auto& tri = d_triangles[ d_triangle_indices[node.start_idx + i] ];
+                intersect_triangle(r, tri);
+            }
+            stack_ptr--;
+            continue;
+        }
+        stack[++stack_ptr] = node.left_node;
+        stack[++stack_ptr] = node.left_node + 1;
+    }
     if (r.t - FLT_MAX > 1.0f || FLT_MAX - r.t > 1.0f){
-        uchar4 pixel = { (uint8_t)(m.color.x*255),
-                         (uint8_t)(m.color.y*255),
-                         (uint8_t)(m.color.z*255),
+        glm::vec3 poi = r.origin + r.t*r.direction;
+        auto v = glm::normalize(r.origin - poi);
+        auto n = r.normal;
+        auto l = camera_pos - poi;
+        auto h = glm::normalize(v+l);
+
+        float diff = max( glm::dot(n,l), 0.0f);
+        auto diff_color = m.c_r*diff;
+
+        float spec = pow( max( dot(n,h), 0.0f), 0.0f);
+        auto spec_color = spec*m.c_p;
+
+        auto L = m.k_a*m.c_r + m.k_d*diff_color + m.k_s*spec_color;
+        uchar4 pixel = { (uint8_t)(L.x*255),
+                         (uint8_t)(L.y*255),
+                         (uint8_t)(L.z*255),
                          (uint8_t)(1.0*255)};
         surf2Dwrite(pixel, surface, x * sizeof(uchar4), y);
         return;

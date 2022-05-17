@@ -9,7 +9,7 @@
 #include <vector>
 #include <iostream>
 #include <cuda_runtime.h>
-#include "glm/vec3.hpp"
+#include "glm/glm.hpp"
 #include <cmath>
 
 class Bounding_Box{
@@ -49,11 +49,13 @@ public:
     glm::vec3 b;
     glm::vec3 c;
     glm::vec3 centroid;
+    glm::vec3 normal;
     __device__ __host__ Triangle(glm::vec3& v0, glm::vec3& v1, glm::vec3& v2 ){
         a = v0;
         b = v1;
         c = v2;
         centroid = (a+b+c)/(3.0f);
+        normal = glm::normalize( glm::cross(b-a, c-a) );
     }
 };
 
@@ -68,7 +70,7 @@ public:
     int start_idx{0};
     int prim_count{0};
 
-    __device__ __host__ bool is_leaf(){
+    __device__ __host__ bool is_leaf() const{
         return prim_count > 0;
     }
 };
